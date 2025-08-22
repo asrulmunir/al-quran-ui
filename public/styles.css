@@ -831,11 +831,12 @@ select:focus {
 
 .attribution {
     position: absolute;
-    bottom: 20px;
-    right: 30px;
-    font-size: 0.9rem;
+    bottom: 15px;
+    right: 20px;
+    font-size: 0.8rem;
     opacity: 0.6;
     font-weight: 500;
+    white-space: nowrap;
 }
 
 /* Theme Styles */
@@ -996,6 +997,14 @@ select:focus {
     
     .screenshot-preview.medium .chapter-name-arabic {
         font-size: 1.3rem;
+    }
+    
+    .attribution {
+        position: absolute;
+        bottom: 10px;
+        right: 15px;
+        font-size: 0.7rem;
+        opacity: 0.5;
     }
 }
 

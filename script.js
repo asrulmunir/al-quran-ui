@@ -1060,9 +1060,16 @@ function updateScreenshotPreview(verseData, translationData, translationLang, ch
         
         // Update attribution with translator
         if (translatorName) {
-            attributionEl.textContent = `Translation: ${translatorName} | Al-Quran API Showcase`;
+            // Shorten translator names for better mobile display
+            const shortTranslatorName = translatorName
+                .replace('Dr. Muhammad Taqi-ud-Din Al-Hilali and Dr. Muhammad Muhsin Khan', 'Hilali-Khan')
+                .replace('Abdullah Muhammad Basmeih', 'Basmeih')
+                .replace('Jan Turst Foundation', 'Jan Turst')
+                .replace('Ma Jian', 'Ma Jian');
+            
+            attributionEl.textContent = `${shortTranslatorName} | Al-Quran API`;
         } else {
-            attributionEl.textContent = 'Al-Quran API Showcase';
+            attributionEl.textContent = 'Al-Quran API';
         }
     }
 }
