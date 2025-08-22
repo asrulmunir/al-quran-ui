@@ -27,9 +27,19 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.classList.add('active');
             document.getElementById(tabId).classList.add('active');
             
-            // Load chapters data when screenshot tab is activated
+            // Load chapters data when verses, compare, or screenshot tab is activated
             if ((tabId === 'verses' || tabId === 'compare' || tabId === 'screenshot') && chaptersData.length === 0) {
                 loadChaptersForDropdown();
+            }
+            
+            // Ensure screenshot dropdown is populated immediately
+            if (tabId === 'screenshot') {
+                setTimeout(() => {
+                    const screenshotSelect = document.getElementById('screenshot-chapter-select');
+                    if (screenshotSelect && screenshotSelect.innerHTML.includes('Loading chapters...')) {
+                        populateBasicChapterDropdown();
+                    }
+                }, 100);
             }
         });
     });
@@ -39,6 +49,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Load chapters data for dropdowns
     loadChaptersForDropdown();
+    
+    // Ensure screenshot dropdown is initialized
+    setTimeout(() => {
+        const screenshotSelect = document.getElementById('screenshot-chapter-select');
+        if (screenshotSelect && screenshotSelect.innerHTML.includes('Loading chapters...')) {
+            populateBasicChapterDropdown();
+        }
+    }, 500);
 });
 
 // Utility Functions
@@ -219,9 +237,8 @@ function populateChapterDropdown() {
 
 function populateBasicChapterDropdown() {
     const chapterSelect = document.getElementById('verse-chapter-select');
-    if (!chapterSelect) return;
-    
-    chapterSelect.innerHTML = '<option value="">Select a chapter</option>';
+    const compareChapterSelect = document.getElementById('compare-chapter-select');
+    const screenshotChapterSelect = document.getElementById('screenshot-chapter-select');
     
     // Basic chapter list with approximate verse counts for popular chapters
     const basicChapters = [
@@ -234,20 +251,34 @@ function populateBasicChapterDropdown() {
         {number: 112, name: "Al-Ikhlas", verses: 4}
     ];
     
-    // Add all 114 chapters with basic numbering
-    for (let i = 1; i <= 114; i++) {
-        const basicChapter = basicChapters.find(ch => ch.number === i);
-        const option = document.createElement('option');
-        option.value = i;
-        if (basicChapter) {
-            option.textContent = `${i}. ${basicChapter.name} (~${basicChapter.verses} verses)`;
-            option.dataset.verseCount = basicChapter.verses;
-        } else {
-            option.textContent = `${i}. Chapter ${i}`;
-            option.dataset.verseCount = 50; // Default estimate
+    // Function to populate a dropdown
+    function populateDropdown(selectElement) {
+        if (!selectElement) return;
+        
+        selectElement.innerHTML = '<option value="">Select a chapter</option>';
+        
+        // Add all 114 chapters with basic numbering
+        for (let i = 1; i <= 114; i++) {
+            const basicChapter = basicChapters.find(ch => ch.number === i);
+            const option = document.createElement('option');
+            option.value = i;
+            if (basicChapter) {
+                option.textContent = `${i}. ${basicChapter.name} (~${basicChapter.verses} verses)`;
+                option.dataset.verseCount = basicChapter.verses;
+                option.dataset.chapterName = basicChapter.name;
+            } else {
+                option.textContent = `${i}. Chapter ${i}`;
+                option.dataset.verseCount = 50; // Default estimate
+                option.dataset.chapterName = `Chapter ${i}`;
+            }
+            selectElement.appendChild(option);
         }
-        chapterSelect.appendChild(option);
     }
+    
+    // Populate all dropdowns
+    populateDropdown(chapterSelect);
+    populateDropdown(compareChapterSelect);
+    populateDropdown(screenshotChapterSelect);
 }
 
 function updateVerseRange() {
