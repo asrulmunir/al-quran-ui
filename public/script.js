@@ -1033,6 +1033,9 @@ function updateScreenshotPreview(verseData, translationData, translationLang, ch
     // Update Arabic text
     arabicTextEl.textContent = verseData.text;
     
+    // Auto-adjust font size for long verses
+    adjustFontSizeForContent();
+    
     // Update translation
     if (translationLang === 'none') {
         translationTextEl.style.display = 'none';
@@ -1071,6 +1074,34 @@ function updateScreenshotPreview(verseData, translationData, translationLang, ch
         } else {
             attributionEl.textContent = 'Al-Quran API';
         }
+    }
+}
+
+// Auto-adjust font size based on content length
+function adjustFontSizeForContent() {
+    const preview = document.getElementById('screenshot-preview');
+    const arabicText = document.getElementById('screenshot-arabic-text');
+    const translationText = document.getElementById('screenshot-translation-text');
+    
+    if (!preview || !arabicText) return;
+    
+    const arabicLength = arabicText.textContent.length;
+    const translationLength = translationText && translationText.style.display !== 'none' 
+        ? translationText.textContent.length : 0;
+    
+    // Remove any existing auto-size classes
+    preview.classList.remove('auto-small', 'auto-tiny', 'auto-micro');
+    
+    // Calculate total content length
+    const totalLength = arabicLength + translationLength;
+    
+    // Apply auto-sizing based on content length
+    if (totalLength > 800) {
+        preview.classList.add('auto-micro');
+    } else if (totalLength > 500) {
+        preview.classList.add('auto-tiny');
+    } else if (totalLength > 300) {
+        preview.classList.add('auto-small');
     }
 }
 

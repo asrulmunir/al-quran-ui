@@ -965,6 +965,88 @@ select:focus {
     font-size: 2.4rem;
 }
 
+/* Auto font-size adjustment for long verses */
+.screenshot-preview.auto-small .arabic-verse {
+    font-size: 1.8rem !important;
+    line-height: 1.6;
+}
+
+.screenshot-preview.auto-small .translation-verse {
+    font-size: 1.1rem !important;
+    line-height: 1.5;
+}
+
+.screenshot-preview.auto-small .chapter-name-english {
+    font-size: 1.4rem !important;
+}
+
+.screenshot-preview.auto-small .chapter-name-arabic {
+    font-size: 1.2rem !important;
+}
+
+.screenshot-preview.auto-tiny .arabic-verse {
+    font-size: 1.5rem !important;
+    line-height: 1.5;
+}
+
+.screenshot-preview.auto-tiny .translation-verse {
+    font-size: 1rem !important;
+    line-height: 1.4;
+}
+
+.screenshot-preview.auto-tiny .chapter-name-english {
+    font-size: 1.2rem !important;
+}
+
+.screenshot-preview.auto-tiny .chapter-name-arabic {
+    font-size: 1rem !important;
+}
+
+.screenshot-preview.auto-micro .arabic-verse {
+    font-size: 1.2rem !important;
+    line-height: 1.4;
+}
+
+.screenshot-preview.auto-micro .translation-verse {
+    font-size: 0.9rem !important;
+    line-height: 1.3;
+}
+
+.screenshot-preview.auto-micro .chapter-name-english {
+    font-size: 1rem !important;
+}
+
+.screenshot-preview.auto-micro .chapter-name-arabic {
+    font-size: 0.9rem !important;
+}
+
+/* Mobile-specific auto-sizing */
+@media (max-width: 900px) {
+    .screenshot-preview.auto-small .arabic-verse {
+        font-size: 1.4rem !important;
+    }
+    
+    .screenshot-preview.auto-small .translation-verse {
+        font-size: 0.95rem !important;
+    }
+    
+    .screenshot-preview.auto-tiny .arabic-verse {
+        font-size: 1.2rem !important;
+    }
+    
+    .screenshot-preview.auto-tiny .translation-verse {
+        font-size: 0.85rem !important;
+    }
+    
+    .screenshot-preview.auto-micro .arabic-verse {
+        font-size: 1rem !important;
+    }
+    
+    .screenshot-preview.auto-micro .translation-verse {
+        font-size: 0.75rem !important;
+    }
+}
+
 /* Language-specific fonts for screenshot */
 .screenshot-preview .translation-verse.chinese {
     font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', 'SimSun', sans-serif;
