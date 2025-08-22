@@ -2,9 +2,13 @@
 
 A comprehensive web application that demonstrates all functionalities of the Al-Quran API (https://quran-api.asrulmunir.workers.dev). Built with vanilla JavaScript, HTML, and CSS - no frameworks required.
 
+## 🌐 Live Demo
+
+**Cloudflare Workers**: https://al-quran-ui.asrulmunir.workers.dev
+
 ## Features
 
-This web app showcases all 8 main API endpoints:
+This web app showcases all 8 main API endpoints with support for **4 languages**:
 
 ### 1. 📊 API Information (`/api/info`)
 - Displays basic statistics about the Quran
@@ -25,8 +29,10 @@ This web app showcases all 8 main API endpoints:
 
 ### 4. 🔄 Translation Comparison (`/api/compare/{chapter}/{verse}`)
 - Side-by-side comparison of Arabic text with translations
-- English translation (Hilali-Khan)
-- Malay translation (Basmeih)
+- **English translation** (Hilali-Khan)
+- **Malay translation** (Basmeih)
+- **Chinese translation** (Ma Jian - 中文 简体)
+- **Tamil translation** (Jan Turst Foundation - தமிழ்)
 - Proper attribution and translator information
 
 ### 5. 🔍 Arabic Text Search (`/api/search`)
@@ -36,17 +42,19 @@ This web app showcases all 8 main API endpoints:
   - Arabic text normalization
   - Configurable result limits
 - Quick search buttons for common terms (الله, رب, رحمن, etc.)
+- **Optional translations** in all 4 supported languages
 
 ### 6. 🌐 Translation Search (`/api/search/translation`)
 - Reverse search - find verses by searching translations
-- Support for English and Malay languages
+- **Support for 4 languages**: English, Malay, Chinese, and Tamil
 - Concept-based search (mercy, forgiveness, guidance, etc.)
 - Include/exclude Arabic text in results
+- **Quick search buttons** with native scripts for each language
 
 ### 7. 🌍 Available Translations (`/api/translations`)
 - List all available translations
 - Translator information and attribution
-- Language support details
+- Language support details for all 4 languages
 
 ### 8. 📈 Quran Statistics (`/api/stats`)
 - Comprehensive statistics dashboard
@@ -91,18 +99,19 @@ This web app showcases all 8 main API endpoints:
 
 ### Search Tips
 - **Arabic Search**: Use Arabic text with normalization enabled for better results
-- **Translation Search**: Search for concepts in English or Malay
+- **Translation Search**: Search for concepts in English, Malay, Chinese, or Tamil
 - **Quick Access**: Use the quick search buttons for common terms
 - **Keyboard Shortcuts**: 
   - `Ctrl/Cmd + Enter`: Execute search in active tab
   - `Escape`: Close error modals
 
 ### Popular Use Cases
-1. **Study Aid**: Compare translations side-by-side
+1. **Study Aid**: Compare translations side-by-side in multiple languages
 2. **Research Tool**: Search for specific terms or concepts
 3. **Educational**: Browse chapters and verses systematically
 4. **Reference**: Quick lookup of famous verses
 5. **Analysis**: View statistics and token breakdowns
+6. **Multi-language Learning**: Study Quranic concepts across 4 languages
 
 ## API Integration Examples
 
@@ -203,6 +212,8 @@ This web app is created for educational and demonstration purposes. The Quranic 
 - **Arabic Text**: Tanzil.net Uthmani text (Creative Commons Attribution-NoDerivs 3.0)
 - **English Translation**: Dr. Muhammad Taqi-ud-Din Al-Hilali and Dr. Muhammad Muhsin Khan
 - **Malay Translation**: Abdullah Muhammad Basmeih
+- **Chinese Translation**: Ma Jian (马坚)
+- **Tamil Translation**: Jan Turst Foundation
 
 ## Support
 
