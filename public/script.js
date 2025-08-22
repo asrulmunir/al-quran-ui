@@ -161,9 +161,10 @@ function createTranslationCard(verse) {
     
     if (verse.translations) {
         Object.entries(verse.translations).forEach(([key, translation]) => {
+            const decodedText = decodeHtmlEntities(translation.text);
             html += `
                 <div class="translation-text">
-                    <strong>${translation.language_name}:</strong> ${translation.text}
+                    <strong>${translation.language_name}:</strong> ${decodedText}
                     <div class="translation-info">Translator: ${translation.translator}</div>
                 </div>
             `;
@@ -632,9 +633,10 @@ async function loadTranslationForResult(chapter, verse, resultId, translationLan
             if (translationLanguage === 'en' || translationLanguage === 'both' || translationLanguage === 'all') {
                 const enTranslation = compareData.translations['en.hilali'];
                 if (enTranslation) {
+                    const decodedText = decodeHtmlEntities(enTranslation.text);
                     translationHtml += `
                         <div class="translation-text english-text">
-                            <strong>English:</strong> ${enTranslation.text}
+                            <strong>English:</strong> ${decodedText}
                             <div class="translation-info">Translator: ${enTranslation.translator}</div>
                         </div>
                     `;
@@ -645,9 +647,10 @@ async function loadTranslationForResult(chapter, verse, resultId, translationLan
             if (translationLanguage === 'ms' || translationLanguage === 'both' || translationLanguage === 'all') {
                 const msTranslation = compareData.translations['ms.basmeih'];
                 if (msTranslation) {
+                    const decodedText = decodeHtmlEntities(msTranslation.text);
                     translationHtml += `
                         <div class="translation-text malay-text">
-                            <strong>Bahasa Melayu:</strong> ${msTranslation.text}
+                            <strong>Bahasa Melayu:</strong> ${decodedText}
                             <div class="translation-info">Translator: ${msTranslation.translator}</div>
                         </div>
                     `;
@@ -658,9 +661,10 @@ async function loadTranslationForResult(chapter, verse, resultId, translationLan
             if (translationLanguage === 'zh' || translationLanguage === 'all') {
                 const zhTranslation = compareData.translations['zh.jian'];
                 if (zhTranslation) {
+                    const decodedText = decodeHtmlEntities(zhTranslation.text);
                     translationHtml += `
                         <div class="translation-text chinese-text">
-                            <strong>中文:</strong> ${zhTranslation.text}
+                            <strong>中文:</strong> ${decodedText}
                             <div class="translation-info">Translator: ${zhTranslation.translator}</div>
                         </div>
                     `;
@@ -671,9 +675,10 @@ async function loadTranslationForResult(chapter, verse, resultId, translationLan
             if (translationLanguage === 'ta' || translationLanguage === 'all') {
                 const taTranslation = compareData.translations['ta.tamil'];
                 if (taTranslation) {
+                    const decodedText = decodeHtmlEntities(taTranslation.text);
                     translationHtml += `
                         <div class="translation-text tamil-text">
-                            <strong>தமிழ்:</strong> ${taTranslation.text}
+                            <strong>தமிழ்:</strong> ${decodedText}
                             <div class="translation-info">Translator: ${taTranslation.translator}</div>
                         </div>
                     `;
@@ -841,18 +846,20 @@ function displayTranslationSearchResults(data, containerId) {
             // Display translation text with proper language styling
             if (result.translation && result.translation.text) {
                 const langClass = getLanguageClass(result.translation.language);
+                const decodedText = decodeHtmlEntities(result.translation.text);
                 html += `
                     <div class="translation-text ${langClass}">
-                        <strong>${result.translation.languageName}:</strong> ${result.translation.text}
+                        <strong>${result.translation.languageName}:</strong> ${decodedText}
                         <div class="translation-info">Translator: ${result.translation.translator}</div>
                     </div>
                 `;
             } else if (typeof result.translation === 'string') {
                 // Fallback for simple string translations
                 const langClass = getLanguageClass(data.language);
+                const decodedText = decodeHtmlEntities(result.translation);
                 html += `
                     <div class="translation-text ${langClass}">
-                        <strong>${data.languageName}:</strong> ${result.translation}
+                        <strong>${data.languageName}:</strong> ${decodedText}
                     </div>
                 `;
             }
@@ -968,6 +975,13 @@ async function generateScreenshot() {
     }
 }
 
+// Utility function to decode HTML entities
+function decodeHtmlEntities(text) {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = text;
+    return textarea.value;
+}
+
 function updateScreenshotPreview(verseData, translationData, translationLang, chapterInfo) {
     const chapterNameEl = document.getElementById('screenshot-chapter-name');
     const verseReferenceEl = document.getElementById('screenshot-verse-reference');
@@ -1037,7 +1051,8 @@ function updateScreenshotPreview(verseData, translationData, translationLang, ch
             const translation = translationData.translations[translationKey];
             
             if (translation) {
-                translationText = translation.text;
+                // Decode HTML entities in translation text
+                translationText = decodeHtmlEntities(translation.text);
                 translatorName = translation.translator;
                 languageClass = getLanguageClass(translationLang);
             }
