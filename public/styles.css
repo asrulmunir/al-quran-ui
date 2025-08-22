@@ -720,6 +720,232 @@ select:focus {
     font-family: 'Noto Sans Tamil', 'Latha', sans-serif;
 }
 
+/* Screenshot Generator Styles */
+.screenshot-controls {
+    background: #f8f9ff;
+    padding: 20px;
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+    margin-bottom: 20px;
+}
+
+.screenshot-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.quick-verses-screenshot {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.quick-verses-screenshot .btn {
+    margin: 5px;
+    font-size: 0.9rem;
+}
+
+/* Screenshot Preview Container */
+.screenshot-preview-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    padding: 20px;
+    background: #f0f0f0;
+    border-radius: 12px;
+}
+
+.screenshot-preview {
+    width: 800px;
+    min-height: 600px;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.screenshot-content {
+    text-align: center;
+    line-height: 1.6;
+}
+
+.verse-header {
+    margin-bottom: 30px;
+}
+
+.chapter-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #2c3e50;
+}
+
+.verse-reference {
+    font-size: 1.1rem;
+    opacity: 0.8;
+    font-weight: 500;
+}
+
+.arabic-verse {
+    font-family: 'Amiri', 'Traditional Arabic', serif;
+    font-size: 2.5rem;
+    line-height: 1.8;
+    direction: rtl;
+    text-align: center;
+    margin: 40px 0;
+    font-weight: 400;
+    color: #1a202c;
+}
+
+.translation-verse {
+    font-size: 1.4rem;
+    line-height: 1.7;
+    margin: 30px 0;
+    font-style: italic;
+    color: #4a5568;
+}
+
+.attribution {
+    position: absolute;
+    bottom: 20px;
+    right: 30px;
+    font-size: 0.9rem;
+    opacity: 0.6;
+    font-weight: 500;
+}
+
+/* Theme Styles */
+.screenshot-preview.light {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    color: #2c3e50;
+}
+
+.screenshot-preview.dark {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: #ecf0f1;
+}
+
+.screenshot-preview.dark .chapter-name {
+    color: #ecf0f1;
+}
+
+.screenshot-preview.dark .arabic-verse {
+    color: #ffffff;
+}
+
+.screenshot-preview.dark .translation-verse {
+    color: #bdc3c7;
+}
+
+.screenshot-preview.gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+}
+
+.screenshot-preview.gradient .chapter-name,
+.screenshot-preview.gradient .arabic-verse,
+.screenshot-preview.gradient .translation-verse {
+    color: #ffffff;
+}
+
+.screenshot-preview.islamic {
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    color: #ffffff;
+}
+
+.screenshot-preview.islamic .chapter-name,
+.screenshot-preview.islamic .arabic-verse,
+.screenshot-preview.islamic .translation-verse {
+    color: #ffffff;
+}
+
+/* Font Size Variations */
+.screenshot-preview.small .arabic-verse {
+    font-size: 2rem;
+}
+
+.screenshot-preview.small .translation-verse {
+    font-size: 1.1rem;
+}
+
+.screenshot-preview.small .chapter-name {
+    font-size: 1.4rem;
+}
+
+.screenshot-preview.medium .arabic-verse {
+    font-size: 2.5rem;
+}
+
+.screenshot-preview.medium .translation-verse {
+    font-size: 1.4rem;
+}
+
+.screenshot-preview.medium .chapter-name {
+    font-size: 1.8rem;
+}
+
+.screenshot-preview.large .arabic-verse {
+    font-size: 3rem;
+}
+
+.screenshot-preview.large .translation-verse {
+    font-size: 1.7rem;
+}
+
+.screenshot-preview.large .chapter-name {
+    font-size: 2.2rem;
+}
+
+.screenshot-preview.extra-large .arabic-verse {
+    font-size: 3.5rem;
+}
+
+.screenshot-preview.extra-large .translation-verse {
+    font-size: 2rem;
+}
+
+.screenshot-preview.extra-large .chapter-name {
+    font-size: 2.6rem;
+}
+
+/* Language-specific fonts for screenshot */
+.screenshot-preview .translation-verse.chinese {
+    font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', 'SimSun', sans-serif;
+}
+
+.screenshot-preview .translation-verse.tamil {
+    font-family: 'Noto Sans Tamil', 'Latha', 'Tamil Sangam MN', sans-serif;
+}
+
+/* Responsive adjustments for screenshot */
+@media (max-width: 900px) {
+    .screenshot-preview {
+        width: 95%;
+        min-height: 500px;
+        padding: 30px 20px;
+    }
+    
+    .screenshot-preview.medium .arabic-verse {
+        font-size: 2rem;
+    }
+    
+    .screenshot-preview.medium .translation-verse {
+        font-size: 1.2rem;
+    }
+    
+    .screenshot-preview.medium .chapter-name {
+        font-size: 1.5rem;
+    }
+}
+
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
     * {

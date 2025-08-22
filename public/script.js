@@ -27,8 +27,8 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.classList.add('active');
             document.getElementById(tabId).classList.add('active');
             
-            // Load chapters data when verses or compare tab is activated
-            if ((tabId === 'verses' || tabId === 'compare') && chaptersData.length === 0) {
+            // Load chapters data when screenshot tab is activated
+            if ((tabId === 'verses' || tabId === 'compare' || tabId === 'screenshot') && chaptersData.length === 0) {
                 loadChaptersForDropdown();
             }
         });
@@ -177,6 +177,7 @@ async function loadChaptersForDropdown() {
 function populateChapterDropdown() {
     const chapterSelect = document.getElementById('verse-chapter-select');
     const compareChapterSelect = document.getElementById('compare-chapter-select');
+    const screenshotChapterSelect = document.getElementById('screenshot-chapter-select');
     
     // Populate verse chapter dropdown
     if (chapterSelect) {
@@ -199,6 +200,19 @@ function populateChapterDropdown() {
             option.textContent = `${chapter.number}. ${chapter.name} (${chapter.verseCount} verses)`;
             option.dataset.verseCount = chapter.verseCount;
             compareChapterSelect.appendChild(option);
+        });
+    }
+    
+    // Populate screenshot chapter dropdown
+    if (screenshotChapterSelect) {
+        screenshotChapterSelect.innerHTML = '<option value="">Select a chapter</option>';
+        chaptersData.forEach(chapter => {
+            const option = document.createElement('option');
+            option.value = chapter.number;
+            option.textContent = `${chapter.number}. ${chapter.name} (${chapter.verseCount} verses)`;
+            option.dataset.verseCount = chapter.verseCount;
+            option.dataset.chapterName = chapter.name;
+            screenshotChapterSelect.appendChild(option);
         });
     }
 }
@@ -828,6 +842,195 @@ function getLanguageClass(language) {
         case 'ms': return 'malay-text';
         case 'en': return 'english-text';
         default: return '';
+    }
+}
+
+// Screenshot Generator Functions
+function updateScreenshotVerseRange() {
+    const chapterSelect = document.getElementById('screenshot-chapter-select');
+    const verseSelect = document.getElementById('screenshot-verse-select');
+    
+    if (!chapterSelect || !verseSelect) return;
+    
+    const selectedOption = chapterSelect.options[chapterSelect.selectedIndex];
+    
+    if (!selectedOption || !selectedOption.value) {
+        verseSelect.innerHTML = '<option value="">Select chapter first</option>';
+        return;
+    }
+    
+    const verseCount = parseInt(selectedOption.dataset.verseCount) || 50;
+    
+    // Clear and populate verse dropdown
+    verseSelect.innerHTML = '<option value="">Select a verse</option>';
+    
+    for (let i = 1; i <= verseCount; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = `Verse ${i}`;
+        verseSelect.appendChild(option);
+    }
+    
+    // Set default to verse 1
+    verseSelect.value = '1';
+}
+
+function updateScreenshotTheme() {
+    const theme = document.getElementById('screenshot-theme').value;
+    const preview = document.getElementById('screenshot-preview');
+    
+    // Remove all theme classes
+    preview.classList.remove('light', 'dark', 'gradient', 'islamic');
+    // Add selected theme
+    preview.classList.add(theme);
+}
+
+function updateScreenshotFontSize() {
+    const fontSize = document.getElementById('screenshot-font-size').value;
+    const preview = document.getElementById('screenshot-preview');
+    
+    // Remove all font size classes
+    preview.classList.remove('small', 'medium', 'large', 'extra-large');
+    // Add selected font size
+    preview.classList.add(fontSize);
+}
+
+async function generateScreenshot() {
+    const chapterSelect = document.getElementById('screenshot-chapter-select');
+    const verseSelect = document.getElementById('screenshot-verse-select');
+    const translationSelect = document.getElementById('screenshot-translation-select');
+    
+    const chapter = chapterSelect.value;
+    const verse = verseSelect.value;
+    const translationLang = translationSelect.value;
+    
+    if (!chapter || !verse) {
+        showError('Please select both chapter and verse');
+        return;
+    }
+    
+    try {
+        // Get verse data
+        const verseData = await apiRequest(`/api/verses/${chapter}/${verse}`);
+        
+        // Get translation if needed
+        let translationData = null;
+        if (translationLang !== 'none') {
+            translationData = await apiRequest(`/api/compare/${chapter}/${verse}`);
+        }
+        
+        // Update preview
+        updateScreenshotPreview(verseData, translationData, translationLang);
+        
+        // Show download button
+        document.getElementById('download-btn').style.display = 'inline-block';
+        
+    } catch (error) {
+        console.error('Failed to generate screenshot:', error);
+        showError('Failed to load verse data for screenshot');
+    }
+}
+
+function updateScreenshotPreview(verseData, translationData, translationLang) {
+    const chapterNameEl = document.getElementById('screenshot-chapter-name');
+    const verseReferenceEl = document.getElementById('screenshot-verse-reference');
+    const arabicTextEl = document.getElementById('screenshot-arabic-text');
+    const translationTextEl = document.getElementById('screenshot-translation-text');
+    const attributionEl = document.getElementById('screenshot-attribution');
+    
+    // Update chapter name and reference
+    chapterNameEl.textContent = verseData.chapterName || `Chapter ${verseData.chapterNumber}`;
+    verseReferenceEl.textContent = `${verseData.chapterNumber}:${verseData.verseNumber}`;
+    
+    // Update Arabic text
+    arabicTextEl.textContent = verseData.text;
+    
+    // Update translation
+    if (translationLang === 'none') {
+        translationTextEl.style.display = 'none';
+    } else {
+        translationTextEl.style.display = 'block';
+        
+        let translationText = '';
+        let translatorName = '';
+        let languageClass = '';
+        
+        if (translationData && translationData.translations) {
+            const translationKey = getTranslationKey(translationLang);
+            const translation = translationData.translations[translationKey];
+            
+            if (translation) {
+                translationText = translation.text;
+                translatorName = translation.translator;
+                languageClass = getLanguageClass(translationLang);
+            }
+        }
+        
+        translationTextEl.textContent = translationText || 'Translation not available';
+        translationTextEl.className = `translation-verse ${languageClass}`;
+        
+        // Update attribution with translator
+        if (translatorName) {
+            attributionEl.textContent = `Translation: ${translatorName} | Al-Quran API Showcase`;
+        } else {
+            attributionEl.textContent = 'Al-Quran API Showcase';
+        }
+    }
+}
+
+function getTranslationKey(lang) {
+    switch(lang) {
+        case 'en': return 'en.hilali';
+        case 'ms': return 'ms.basmeih';
+        case 'zh': return 'zh.jian';
+        case 'ta': return 'ta.tamil';
+        default: return 'en.hilali';
+    }
+}
+
+async function loadScreenshotVerse(chapter, verse) {
+    // Update dropdowns
+    const chapterSelect = document.getElementById('screenshot-chapter-select');
+    const verseSelect = document.getElementById('screenshot-verse-select');
+    
+    if (chapterSelect && chapterSelect.value !== chapter.toString()) {
+        chapterSelect.value = chapter.toString();
+        updateScreenshotVerseRange();
+    }
+    
+    if (verseSelect) {
+        verseSelect.value = verse.toString();
+    }
+    
+    // Generate screenshot
+    await generateScreenshot();
+}
+
+async function downloadScreenshot() {
+    const preview = document.getElementById('screenshot-preview');
+    
+    try {
+        // Use html2canvas library if available, otherwise provide instructions
+        if (typeof html2canvas !== 'undefined') {
+            const canvas = await html2canvas(preview, {
+                backgroundColor: null,
+                scale: 2, // Higher quality
+                useCORS: true,
+                allowTaint: true
+            });
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.download = `quran-verse-${Date.now()}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        } else {
+            // Fallback: provide instructions
+            alert('To download the screenshot:\n\n1. Right-click on the preview above\n2. Select "Save image as..." or "Copy image"\n3. Save or paste the image\n\nAlternatively, use your browser\'s screenshot tool or print to PDF.');
+        }
+    } catch (error) {
+        console.error('Screenshot download failed:', error);
+        alert('Screenshot download failed. Please use your browser\'s screenshot tool or right-click to save the image.');
     }
 }
 

@@ -28,6 +28,7 @@
             <button class="tab-btn" data-tab="search-translation">Search Translation</button>
             <button class="tab-btn" data-tab="translations">Translations</button>
             <button class="tab-btn" data-tab="stats">Statistics</button>
+            <button class="tab-btn" data-tab="screenshot">Screenshot</button>
             <button class="tab-btn" data-tab="attribution">Attribution</button>
         </nav>
 
@@ -256,6 +257,90 @@
                     <p>Get comprehensive statistics about the Quran including chapter and verse counts, longest and shortest chapters.</p>
                     <button onclick="loadStatistics()" class="btn primary">Load Statistics</button>
                     <div id="stats-result" class="result-container"></div>
+                </div>
+            </div>
+
+            <!-- Screenshot Tab -->
+            <div class="tab-content" id="screenshot">
+                <div class="section">
+                    <h2>📸 Screenshot Generator</h2>
+                    <p>Create beautiful, shareable images of Quranic verses with customizable translations and formatting.</p>
+                    
+                    <div class="screenshot-controls">
+                        <div class="form-group">
+                            <label for="screenshot-chapter-select">Chapter:</label>
+                            <select id="screenshot-chapter-select" onchange="updateScreenshotVerseRange()">
+                                <option value="">Loading chapters...</option>
+                            </select>
+                            
+                            <label for="screenshot-verse-select">Verse:</label>
+                            <select id="screenshot-verse-select">
+                                <option value="">Select chapter first</option>
+                            </select>
+                            
+                            <label for="screenshot-translation-select">Translation:</label>
+                            <select id="screenshot-translation-select">
+                                <option value="en">English (Hilali-Khan)</option>
+                                <option value="ms">Malay (Basmeih)</option>
+                                <option value="zh">Chinese (Ma Jian)</option>
+                                <option value="ta">Tamil (Jan Turst Foundation)</option>
+                                <option value="none">Arabic Only</option>
+                            </select>
+                            
+                            <div class="screenshot-options">
+                                <label for="screenshot-theme">Theme:</label>
+                                <select id="screenshot-theme" onchange="updateScreenshotTheme()">
+                                    <option value="light">Light</option>
+                                    <option value="dark">Dark</option>
+                                    <option value="gradient">Gradient</option>
+                                    <option value="islamic">Islamic Green</option>
+                                </select>
+                                
+                                <label for="screenshot-font-size">Font Size:</label>
+                                <select id="screenshot-font-size" onchange="updateScreenshotFontSize()">
+                                    <option value="small">Small</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="large">Large</option>
+                                    <option value="extra-large">Extra Large</option>
+                                </select>
+                            </div>
+                            
+                            <button onclick="generateScreenshot()" class="btn primary">Generate Screenshot</button>
+                            <button onclick="downloadScreenshot()" class="btn secondary" id="download-btn" style="display: none;">Download Image</button>
+                        </div>
+                        
+                        <div class="quick-verses-screenshot">
+                            <h3>Quick Famous Verses:</h3>
+                            <button onclick="loadScreenshotVerse(1, 1)" class="btn secondary">Al-Fatihah 1:1</button>
+                            <button onclick="loadScreenshotVerse(2, 255)" class="btn secondary">Ayat al-Kursi</button>
+                            <button onclick="loadScreenshotVerse(112, 1)" class="btn secondary">Al-Ikhlas</button>
+                            <button onclick="loadScreenshotVerse(2, 286)" class="btn secondary">Last verse of Al-Baqarah</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Screenshot Preview Area -->
+                <div class="screenshot-preview-container">
+                    <div id="screenshot-preview" class="screenshot-preview light medium">
+                        <div class="screenshot-content">
+                            <div class="verse-header">
+                                <div class="chapter-name" id="screenshot-chapter-name">Select a verse to preview</div>
+                                <div class="verse-reference" id="screenshot-verse-reference"></div>
+                            </div>
+                            
+                            <div class="arabic-verse" id="screenshot-arabic-text">
+                                اختر آية لمعاينتها
+                            </div>
+                            
+                            <div class="translation-verse" id="screenshot-translation-text">
+                                Select a verse to see the translation
+                            </div>
+                            
+                            <div class="attribution" id="screenshot-attribution">
+                                Al-Quran API Showcase
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
