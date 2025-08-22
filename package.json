@@ -1,0 +1,36 @@
+{
+  "name": "al-quran-ui",
+  "version": "1.0.0",
+  "description": "Al-Quran API Showcase - Complete web application demonstrating all API functionalities with support for English, Malay, Chinese, and Tamil translations",
+  "main": "worker.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler preview"
+  },
+  "keywords": [
+    "quran",
+    "islamic",
+    "api",
+    "translations",
+    "cloudflare-workers",
+    "arabic",
+    "english",
+    "malay",
+    "chinese",
+    "tamil"
+  ],
+  "author": "Asrul Munir",
+  "license": "MIT",
+  "dependencies": {
+    "@cloudflare/kv-asset-handler": "^0.3.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/asrulmunir/al-quran-ui.git"
+  },
+  "homepage": "https://github.com/asrulmunir/al-quran-ui#readme"
+}
