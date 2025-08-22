@@ -966,9 +966,6 @@ async function generateScreenshot() {
         // Update preview with chapter info
         updateScreenshotPreview(verseData, translationData, translationLang, chapterInfo);
         
-        // Show download button
-        document.getElementById('download-btn').style.display = 'inline-block';
-        
     } catch (error) {
         console.error('Failed to generate screenshot:', error);
         showError('Failed to load verse data for screenshot');
@@ -1096,34 +1093,6 @@ async function loadScreenshotVerse(chapter, verse) {
     
     // Generate screenshot
     await generateScreenshot();
-}
-
-async function downloadScreenshot() {
-    const preview = document.getElementById('screenshot-preview');
-    
-    try {
-        // Use html2canvas library if available, otherwise provide instructions
-        if (typeof html2canvas !== 'undefined') {
-            const canvas = await html2canvas(preview, {
-                backgroundColor: null,
-                scale: 2, // Higher quality
-                useCORS: true,
-                allowTaint: true
-            });
-            
-            // Create download link
-            const link = document.createElement('a');
-            link.download = `quran-verse-${Date.now()}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
-        } else {
-            // Fallback: provide instructions
-            alert('To download the screenshot:\n\n1. Right-click on the preview above\n2. Select "Save image as..." or "Copy image"\n3. Save or paste the image\n\nAlternatively, use your browser\'s screenshot tool or print to PDF.');
-        }
-    } catch (error) {
-        console.error('Screenshot download failed:', error);
-        alert('Screenshot download failed. Please use your browser\'s screenshot tool or right-click to save the image.');
-    }
 }
 
 // 8. List Translations
