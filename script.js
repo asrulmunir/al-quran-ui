@@ -1,0 +1,1023 @@
+// Base API URL
+const API_BASE = 'https://quran-api.asrulmunir.workers.dev';
+
+// DOM Elements
+const loadingEl = document.getElementById('loading');
+const errorModal = document.getElementById('error-modal');
+const errorMessage = document.getElementById('error-message');
+
+// Global variable to store chapters data
+let chaptersData = [];
+
+// Tab Management
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tab functionality
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-tab');
+            
+            // Remove active class from all tabs and contents
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            
+            // Add active class to clicked tab and corresponding content
+            btn.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+            
+            // Load chapters data when verses or compare tab is activated
+            if ((tabId === 'verses' || tabId === 'compare') && chaptersData.length === 0) {
+                loadChaptersForDropdown();
+            }
+        });
+    });
+
+    // Initialize tooltips and other setup functions
+    initializeTooltips();
+    
+    // Load chapters data for dropdowns
+    loadChaptersForDropdown();
+});
+
+// Utility Functions
+function showLoading() {
+    loadingEl.classList.remove('hidden');
+}
+
+function hideLoading() {
+    loadingEl.classList.add('hidden');
+}
+
+function showError(message) {
+    errorMessage.textContent = message;
+    errorModal.classList.remove('hidden');
+}
+
+function closeErrorModal() {
+    errorModal.classList.add('hidden');
+}
+
+async function apiRequest(endpoint) {
+    try {
+        showLoading();
+        const url = `${API_BASE}${endpoint}`;
+        console.log('Making API request to:', url);
+        
+        const response = await fetch(url);
+        console.log('Response status:', response.status, response.statusText);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('API Error Response:', errorText);
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('API Response data:', data);
+        return data;
+    } catch (error) {
+        console.error('API Error:', error);
+        showError(`API Error: ${error.message}`);
+        throw error;
+    } finally {
+        hideLoading();
+    }
+}
+
+function formatJson(obj) {
+    return `<pre><code>${JSON.stringify(obj, null, 2)}</code></pre>`;
+}
+
+function createVerseCard(verse, showReference = true) {
+    const card = document.createElement('div');
+    card.className = 'verse-card';
+    
+    let html = '';
+    
+    if (showReference && verse.chapterNumber && verse.verseNumber) {
+        html += `<div class="verse-reference">Chapter ${verse.chapterNumber}, Verse ${verse.verseNumber}</div>`;
+    }
+    
+    if (verse.text) {
+        html += `<div class="arabic-text">${verse.text}</div>`;
+    }
+    
+    if (verse.location) {
+        html += `<div class="verse-reference">${verse.location}</div>`;
+    }
+    
+    if (verse.tokenCount) {
+        html += `<div class="translation-info">Token Count: ${verse.tokenCount}</div>`;
+    }
+    
+    card.innerHTML = html;
+    return card;
+}
+
+function createChapterCard(chapter) {
+    const card = document.createElement('div');
+    card.className = 'chapter-card';
+    card.onclick = () => loadSpecificChapter(chapter.number);
+    
+    card.innerHTML = `
+        <div class="chapter-number">${chapter.number}</div>
+        <div class="chapter-name">${chapter.name}</div>
+        <div class="chapter-info">${chapter.verseCount} verses</div>
+        ${chapter.tokenCount ? `<div class="chapter-info">${chapter.tokenCount} tokens</div>` : ''}
+    `;
+    
+    return card;
+}
+
+function createTranslationCard(verse) {
+    const card = document.createElement('div');
+    card.className = 'verse-card';
+    
+    let html = `<div class="verse-reference">Chapter ${verse.chapterNumber}, Verse ${verse.verseNumber}</div>`;
+    
+    if (verse.arabic && verse.arabic.text) {
+        html += `<div class="arabic-text">${verse.arabic.text}</div>`;
+    }
+    
+    if (verse.translations) {
+        Object.entries(verse.translations).forEach(([key, translation]) => {
+            html += `
+                <div class="translation-text">
+                    <strong>${translation.language_name}:</strong> ${translation.text}
+                    <div class="translation-info">Translator: ${translation.translator}</div>
+                </div>
+            `;
+        });
+    }
+    
+    card.innerHTML = html;
+    return card;
+}
+
+// Load chapters data for dropdown (without showing loading spinner)
+async function loadChaptersForDropdown() {
+    try {
+        if (chaptersData.length === 0) {
+            const response = await fetch(`${API_BASE}/api/chapters`);
+            if (response.ok) {
+                chaptersData = await response.json();
+            }
+        }
+        
+        populateChapterDropdown();
+    } catch (error) {
+        console.error('Failed to load chapters for dropdown:', error);
+        // Fallback: populate with basic chapter numbers
+        populateBasicChapterDropdown();
+    }
+}
+
+function populateChapterDropdown() {
+    const chapterSelect = document.getElementById('verse-chapter-select');
+    const compareChapterSelect = document.getElementById('compare-chapter-select');
+    
+    // Populate verse chapter dropdown
+    if (chapterSelect) {
+        chapterSelect.innerHTML = '<option value="">Select a chapter</option>';
+        chaptersData.forEach(chapter => {
+            const option = document.createElement('option');
+            option.value = chapter.number;
+            option.textContent = `${chapter.number}. ${chapter.name} (${chapter.verseCount} verses)`;
+            option.dataset.verseCount = chapter.verseCount;
+            chapterSelect.appendChild(option);
+        });
+    }
+    
+    // Populate compare chapter dropdown
+    if (compareChapterSelect) {
+        compareChapterSelect.innerHTML = '<option value="">Select a chapter</option>';
+        chaptersData.forEach(chapter => {
+            const option = document.createElement('option');
+            option.value = chapter.number;
+            option.textContent = `${chapter.number}. ${chapter.name} (${chapter.verseCount} verses)`;
+            option.dataset.verseCount = chapter.verseCount;
+            compareChapterSelect.appendChild(option);
+        });
+    }
+}
+
+function populateBasicChapterDropdown() {
+    const chapterSelect = document.getElementById('verse-chapter-select');
+    if (!chapterSelect) return;
+    
+    chapterSelect.innerHTML = '<option value="">Select a chapter</option>';
+    
+    // Basic chapter list with approximate verse counts for popular chapters
+    const basicChapters = [
+        {number: 1, name: "Al-Fatihah", verses: 7},
+        {number: 2, name: "Al-Baqarah", verses: 286},
+        {number: 3, name: "Ali 'Imran", verses: 200},
+        {number: 18, name: "Al-Kahf", verses: 110},
+        {number: 36, name: "Ya-Sin", verses: 83},
+        {number: 67, name: "Al-Mulk", verses: 30},
+        {number: 112, name: "Al-Ikhlas", verses: 4}
+    ];
+    
+    // Add all 114 chapters with basic numbering
+    for (let i = 1; i <= 114; i++) {
+        const basicChapter = basicChapters.find(ch => ch.number === i);
+        const option = document.createElement('option');
+        option.value = i;
+        if (basicChapter) {
+            option.textContent = `${i}. ${basicChapter.name} (~${basicChapter.verses} verses)`;
+            option.dataset.verseCount = basicChapter.verses;
+        } else {
+            option.textContent = `${i}. Chapter ${i}`;
+            option.dataset.verseCount = 50; // Default estimate
+        }
+        chapterSelect.appendChild(option);
+    }
+}
+
+function updateVerseRange() {
+    const chapterSelect = document.getElementById('verse-chapter-select');
+    const verseSelect = document.getElementById('verse-number-select');
+    
+    if (!chapterSelect || !verseSelect) return;
+    
+    const selectedOption = chapterSelect.options[chapterSelect.selectedIndex];
+    
+    if (!selectedOption || !selectedOption.value) {
+        verseSelect.innerHTML = '<option value="">Select chapter first</option>';
+        return;
+    }
+    
+    const verseCount = parseInt(selectedOption.dataset.verseCount) || 50;
+    
+    // Clear and populate verse dropdown
+    verseSelect.innerHTML = '<option value="">Select a verse</option>';
+    
+    for (let i = 1; i <= verseCount; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = `Verse ${i}`;
+        verseSelect.appendChild(option);
+    }
+    
+    // Set default to verse 1
+    verseSelect.value = '1';
+}
+
+// 1. API Info
+async function loadApiInfo() {
+    try {
+        const data = await apiRequest('/api/info');
+        const container = document.getElementById('api-info-result');
+        
+        container.innerHTML = `
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">${data.chapterCount}</div>
+                    <div class="stat-label">Chapters</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.verseCount}</div>
+                    <div class="stat-label">Verses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.tokenCount}</div>
+                    <div class="stat-label">Tokens</div>
+                </div>
+            </div>
+            <h3>API Details:</h3>
+            ${formatJson(data)}
+        `;
+    } catch (error) {
+        console.error('Failed to load API info:', error);
+    }
+}
+
+// 2. List Chapters
+async function loadChapters() {
+    try {
+        const data = await apiRequest('/api/chapters');
+        const container = document.getElementById('chapters-result');
+        
+        container.innerHTML = '<h3>All Chapters (Click to view):</h3>';
+        
+        data.forEach(chapter => {
+            container.appendChild(createChapterCard(chapter));
+        });
+    } catch (error) {
+        console.error('Failed to load chapters:', error);
+    }
+}
+
+// 3. Get Specific Chapter
+async function loadChapter() {
+    const chapterId = document.getElementById('chapter-id').value;
+    if (!chapterId || chapterId < 1 || chapterId > 114) {
+        showError('Please enter a valid chapter number (1-114)');
+        return;
+    }
+    
+    await loadSpecificChapter(chapterId);
+}
+
+async function loadSpecificChapter(chapterId) {
+    try {
+        const data = await apiRequest(`/api/chapters/${chapterId}`);
+        const container = document.getElementById('chapter-result');
+        
+        let html = `
+            <h3>Chapter ${data.number}: ${data.name}</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">${data.verseCount}</div>
+                    <div class="stat-label">Verses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.tokenCount}</div>
+                    <div class="stat-label">Tokens</div>
+                </div>
+            </div>
+        `;
+        
+        if (data.verses && data.verses.length > 0) {
+            html += '<h4>Verses:</h4>';
+            data.verses.forEach((verse, index) => {
+                html += `
+                    <div class="verse-card">
+                        <div class="verse-reference">Verse ${index + 1}</div>
+                        <div class="arabic-text">${verse.text}</div>
+                        <div class="translation-info">Tokens: ${verse.tokenCount}</div>
+                    </div>
+                `;
+            });
+        }
+        
+        container.innerHTML = html;
+    } catch (error) {
+        console.error('Failed to load chapter:', error);
+    }
+}
+
+// 4. Get Specific Verse
+async function loadVerse() {
+    const chapterSelect = document.getElementById('verse-chapter-select');
+    const verseSelect = document.getElementById('verse-number-select');
+    
+    const chapter = chapterSelect ? chapterSelect.value : document.getElementById('verse-chapter')?.value;
+    const verse = verseSelect ? verseSelect.value : document.getElementById('verse-number')?.value;
+    
+    if (!chapter || !verse) {
+        showError('Please select both chapter and verse');
+        return;
+    }
+    
+    await loadSpecificVerse(chapter, verse);
+}
+
+async function loadSpecificVerse(chapter, verse) {
+    try {
+        const data = await apiRequest(`/api/verses/${chapter}/${verse}`);
+        const container = document.getElementById('verse-result');
+        
+        container.innerHTML = '';
+        container.appendChild(createVerseCard(data));
+        
+        if (data.tokens && data.tokens.length > 0) {
+            const tokensHtml = `
+                <h4>Tokens (${data.tokens.length} total):</h4>
+                <div style="padding: 15px; background: #f5f5f5; border-radius: 8px; margin-top: 15px;">
+                    ${data.tokens.map((token, index) => {
+                        let tokenText = '';
+                        let tokenInfo = '';
+                        
+                        if (typeof token === 'object' && token !== null) {
+                            tokenText = token.text || token.token || token.word || token.arabic || `Token ${index + 1}`;
+                            tokenInfo = token.location ? ` (${token.location})` : '';
+                        } else {
+                            tokenText = String(token);
+                        }
+                        
+                        return `<span style="margin: 5px; padding: 8px 12px; background: white; border-radius: 5px; display: inline-block; font-family: 'Amiri', 'Traditional Arabic', serif; direction: rtl; font-size: 1.2rem; border: 1px solid #ddd;" title="Token ${index + 1}${tokenInfo}">${tokenText}</span>`;
+                    }).join('')}
+                </div>
+                <div style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                    <strong>Token Analysis:</strong> Each token represents a word or morphological unit in the Arabic text.
+                </div>
+            `;
+            container.innerHTML += tokensHtml;
+        }
+        
+        // Update dropdowns to reflect the loaded verse
+        updateDropdownsToVerse(chapter, verse);
+    } catch (error) {
+        console.error('Failed to load verse:', error);
+    }
+}
+
+function updateDropdownsToVerse(chapter, verse) {
+    const chapterSelect = document.getElementById('verse-chapter-select');
+    const verseSelect = document.getElementById('verse-number-select');
+    
+    if (chapterSelect && chapterSelect.value !== chapter.toString()) {
+        chapterSelect.value = chapter.toString();
+        updateVerseRange();
+    }
+    
+    if (verseSelect && verseSelect.value !== verse.toString()) {
+        verseSelect.value = verse.toString();
+    }
+}
+
+function updateCompareVerseRange() {
+    const chapterSelect = document.getElementById('compare-chapter-select');
+    const verseSelect = document.getElementById('compare-verse-select');
+    
+    if (!chapterSelect || !verseSelect) return;
+    
+    const selectedOption = chapterSelect.options[chapterSelect.selectedIndex];
+    
+    if (!selectedOption || !selectedOption.value) {
+        verseSelect.innerHTML = '<option value="">Select chapter first</option>';
+        return;
+    }
+    
+    const verseCount = parseInt(selectedOption.dataset.verseCount) || 50;
+    
+    // Clear and populate verse dropdown
+    verseSelect.innerHTML = '<option value="">Select a verse</option>';
+    
+    for (let i = 1; i <= verseCount; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = `Verse ${i}`;
+        verseSelect.appendChild(option);
+    }
+    
+    // Set default to verse 1
+    verseSelect.value = '1';
+}
+
+// 5. Compare Translations
+async function compareTranslations() {
+    const chapterSelect = document.getElementById('compare-chapter-select');
+    const verseSelect = document.getElementById('compare-verse-select');
+    
+    const chapter = chapterSelect ? chapterSelect.value : document.getElementById('compare-chapter')?.value;
+    const verse = verseSelect ? verseSelect.value : document.getElementById('compare-verse')?.value;
+    
+    if (!chapter || !verse) {
+        showError('Please select both chapter and verse');
+        return;
+    }
+    
+    try {
+        const data = await apiRequest(`/api/compare/${chapter}/${verse}`);
+        const container = document.getElementById('compare-result');
+        
+        container.innerHTML = '';
+        container.appendChild(createTranslationCard(data));
+    } catch (error) {
+        console.error('Failed to compare translations:', error);
+    }
+}
+
+function toggleTranslationOptions() {
+    const showTranslations = document.getElementById('show-translations').checked;
+    const translationOptions = document.getElementById('translation-language-options');
+    
+    if (showTranslations) {
+        translationOptions.classList.remove('hidden');
+    } else {
+        translationOptions.classList.add('hidden');
+    }
+}
+
+// Enhanced search function with translation support
+async function searchArabicWithTranslations(data) {
+    const showTranslations = document.getElementById('show-translations').checked;
+    const translationLanguage = document.getElementById('translation-language').value;
+    
+    if (!showTranslations) {
+        return displaySearchResults(data, 'search-result');
+    }
+    
+    const container = document.getElementById('search-result');
+    
+    let html = `
+        <div class="search-info">
+            Found ${data.resultCount} results for "${data.query}" 
+            (Type: ${data.type}, Normalize: ${data.normalize})
+            ${data.hasMore ? ' - More results available' : ''}
+            <br><strong>Translations:</strong> ${getTranslationLanguageText(translationLanguage)}
+        </div>
+    `;
+    
+    if (data.results && data.results.length > 0) {
+        for (const result of data.results) {
+            html += await createSearchResultWithTranslation(result, translationLanguage);
+        }
+    } else {
+        html += '<p>No results found.</p>';
+    }
+    
+    container.innerHTML = html;
+}
+
+function getTranslationLanguageText(lang) {
+    switch(lang) {
+        case 'en': return 'English only';
+        case 'ms': return 'Malay only';
+        case 'zh': return 'Chinese only';
+        case 'ta': return 'Tamil only';
+        case 'both': return 'English and Malay';
+        case 'all': return 'All available languages';
+        default: return 'Selected language';
+    }
+}
+
+async function createSearchResultWithTranslation(result, translationLanguage) {
+    const resultId = `result-${result.chapterNumber}-${result.verseNumber}`;
+    
+    let html = `
+        <div class="search-result-with-translation">
+            <div class="search-result-header">
+                Chapter ${result.chapterNumber} (${result.chapterName}), Verse ${result.verseNumber}
+            </div>
+            <div class="search-result-content">
+                <div class="arabic-text">${result.verseText}</div>
+                <div class="translation-info">Location: ${result.location}</div>
+                ${result.matchingTokens && result.matchingTokens.length > 0 ? `
+                    <div style="margin-top: 10px;">
+                        <strong>Matching tokens:</strong>
+                        <div style="margin-top: 5px;">
+                            ${result.matchingTokens.map(token => 
+                                `<span style="background: #fffacd; padding: 3px 6px; border-radius: 3px; margin: 2px; display: inline-block; font-family: 'Amiri', 'Traditional Arabic', serif; direction: rtl;">${token.text}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                <div id="${resultId}-translations" class="translation-loading">
+                    Loading translations...
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Load translations asynchronously
+    setTimeout(() => loadTranslationForResult(result.chapterNumber, result.verseNumber, resultId, translationLanguage), 100);
+    
+    return html;
+}
+
+async function loadTranslationForResult(chapter, verse, resultId, translationLanguage) {
+    const translationContainer = document.getElementById(`${resultId}-translations`);
+    
+    if (!translationContainer) return;
+    
+    try {
+        const data = await fetch(`${API_BASE}/api/compare/${chapter}/${verse}`);
+        if (!data.ok) throw new Error('Failed to load translations');
+        
+        const compareData = await data.json();
+        let translationHtml = '';
+        
+        if (compareData.translations) {
+            // English translation
+            if (translationLanguage === 'en' || translationLanguage === 'both' || translationLanguage === 'all') {
+                const enTranslation = compareData.translations['en.hilali'];
+                if (enTranslation) {
+                    translationHtml += `
+                        <div class="translation-text english-text">
+                            <strong>English:</strong> ${enTranslation.text}
+                            <div class="translation-info">Translator: ${enTranslation.translator}</div>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Malay translation
+            if (translationLanguage === 'ms' || translationLanguage === 'both' || translationLanguage === 'all') {
+                const msTranslation = compareData.translations['ms.basmeih'];
+                if (msTranslation) {
+                    translationHtml += `
+                        <div class="translation-text malay-text">
+                            <strong>Bahasa Melayu:</strong> ${msTranslation.text}
+                            <div class="translation-info">Translator: ${msTranslation.translator}</div>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Chinese translation
+            if (translationLanguage === 'zh' || translationLanguage === 'all') {
+                const zhTranslation = compareData.translations['zh.jian'];
+                if (zhTranslation) {
+                    translationHtml += `
+                        <div class="translation-text chinese-text">
+                            <strong>中文:</strong> ${zhTranslation.text}
+                            <div class="translation-info">Translator: ${zhTranslation.translator}</div>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Tamil translation
+            if (translationLanguage === 'ta' || translationLanguage === 'all') {
+                const taTranslation = compareData.translations['ta.tamil'];
+                if (taTranslation) {
+                    translationHtml += `
+                        <div class="translation-text tamil-text">
+                            <strong>தமிழ்:</strong> ${taTranslation.text}
+                            <div class="translation-info">Translator: ${taTranslation.translator}</div>
+                        </div>
+                    `;
+                }
+            }
+        }
+        
+        if (translationHtml) {
+            translationContainer.innerHTML = translationHtml;
+        } else {
+            translationContainer.innerHTML = '<div class="translation-error">Translations not available for this verse.</div>';
+        }
+        
+    } catch (error) {
+        console.error('Failed to load translation:', error);
+        translationContainer.innerHTML = '<div class="translation-error">Failed to load translations.</div>';
+    }
+}
+// 6. Search Arabic Text
+async function searchArabic() {
+    const query = document.getElementById('search-query').value.trim();
+    if (!query) {
+        showError('Please enter an Arabic search query');
+        return;
+    }
+    
+    const type = document.getElementById('search-type').value;
+    const normalize = document.getElementById('normalize').checked;
+    const limit = document.getElementById('search-limit').value;
+    
+    try {
+        // Properly encode the Arabic text for URL
+        const params = new URLSearchParams();
+        params.set('q', query);
+        params.set('type', type);
+        params.set('normalize', normalize.toString());
+        params.set('limit', limit);
+        
+        console.log('Search URL:', `/api/search?${params.toString()}`);
+        
+        const data = await apiRequest(`/api/search?${params.toString()}`);
+        
+        // Use enhanced search results with translations if enabled
+        await searchArabicWithTranslations(data);
+        
+    } catch (error) {
+        console.error('Failed to search Arabic text:', error);
+    }
+}
+
+async function quickSearchArabic(term) {
+    document.getElementById('search-query').value = term;
+    document.getElementById('normalize').checked = true;
+    await searchArabic();
+}
+
+// 7. Search Translations
+async function searchTranslation() {
+    const query = document.getElementById('translation-query').value.trim();
+    if (!query) {
+        showError('Please enter a search query');
+        return;
+    }
+    
+    const lang = document.getElementById('translation-lang').value;
+    const type = document.getElementById('translation-type').value;
+    const includeArabic = document.getElementById('include-arabic').checked;
+    const limit = document.getElementById('translation-limit').value;
+    
+    try {
+        // Properly encode parameters
+        const params = new URLSearchParams();
+        params.set('q', query);
+        params.set('lang', lang);
+        params.set('type', type);
+        params.set('include_arabic', includeArabic.toString());
+        params.set('limit', limit);
+        
+        console.log('Translation search URL:', `/api/search/translation?${params.toString()}`);
+        
+        const data = await apiRequest(`/api/search/translation?${params.toString()}`);
+        displayTranslationSearchResults(data, 'search-translation-result');
+    } catch (error) {
+        console.error('Failed to search translations:', error);
+    }
+}
+
+async function quickSearchTranslation(term, lang) {
+    document.getElementById('translation-query').value = term;
+    document.getElementById('translation-lang').value = lang;
+    await searchTranslation();
+}
+
+function displaySearchResults(data, containerId) {
+    const container = document.getElementById(containerId);
+    
+    let html = `
+        <div class="search-info">
+            Found ${data.resultCount} results for "${data.query}" 
+            (Type: ${data.type}, Normalize: ${data.normalize})
+            ${data.hasMore ? ' - More results available' : ''}
+        </div>
+    `;
+    
+    if (data.results && data.results.length > 0) {
+        data.results.forEach(result => {
+            html += `
+                <div class="verse-card">
+                    <div class="verse-reference">Chapter ${result.chapterNumber} (${result.chapterName}), Verse ${result.verseNumber}</div>
+                    <div class="arabic-text">${result.verseText}</div>
+                    <div class="translation-info">Location: ${result.location}</div>
+                    ${result.matchingTokens && result.matchingTokens.length > 0 ? `
+                        <div style="margin-top: 10px;">
+                            <strong>Matching tokens:</strong>
+                            <div style="margin-top: 5px;">
+                                ${result.matchingTokens.map(token => 
+                                    `<span style="background: #fffacd; padding: 3px 6px; border-radius: 3px; margin: 2px; display: inline-block; font-family: 'Amiri', 'Traditional Arabic', serif; direction: rtl;">${token.text}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        });
+    } else {
+        html += '<p>No results found.</p>';
+    }
+    
+    container.innerHTML = html;
+}
+
+function displayTranslationSearchResults(data, containerId) {
+    const container = document.getElementById(containerId);
+    
+    let html = `
+        <div class="search-info">
+            Found ${data.resultCount} results for "${data.query}" in ${data.languageName}
+            (Translator: ${data.translator}, Type: ${data.searchType})
+            ${data.hasMore ? ' - More results available' : ''}
+        </div>
+    `;
+    
+    if (data.searchInfo) {
+        html += `
+            <div style="background: #e8f4fd; padding: 10px; border-radius: 8px; margin: 10px 0; font-size: 0.9rem; color: #1565c0;">
+                <strong>Search Info:</strong> ${data.searchInfo.searchedIn}
+            </div>
+        `;
+    }
+    
+    if (data.results && data.results.length > 0) {
+        data.results.forEach(result => {
+            html += `
+                <div class="verse-card">
+                    <div class="verse-reference">
+                        Chapter ${result.chapterNumber} (${result.chapterName}${result.chapterNameArabic ? ` - ${result.chapterNameArabic}` : ''}), Verse ${result.verseNumber}
+                    </div>
+            `;
+            
+            // Display Arabic text if available
+            if (result.arabic && result.arabic.text) {
+                html += `<div class="arabic-text">${result.arabic.text}</div>`;
+            }
+            
+            // Display translation text with proper language styling
+            if (result.translation && result.translation.text) {
+                const langClass = getLanguageClass(result.translation.language);
+                html += `
+                    <div class="translation-text ${langClass}">
+                        <strong>${result.translation.languageName}:</strong> ${result.translation.text}
+                        <div class="translation-info">Translator: ${result.translation.translator}</div>
+                    </div>
+                `;
+            } else if (typeof result.translation === 'string') {
+                // Fallback for simple string translations
+                const langClass = getLanguageClass(data.language);
+                html += `
+                    <div class="translation-text ${langClass}">
+                        <strong>${data.languageName}:</strong> ${result.translation}
+                    </div>
+                `;
+            }
+            
+            html += `</div>`;
+        });
+    } else {
+        html += '<p>No results found.</p>';
+    }
+    
+    container.innerHTML = html;
+}
+
+function getLanguageClass(language) {
+    switch(language) {
+        case 'zh': return 'chinese-text';
+        case 'ta': return 'tamil-text';
+        case 'ms': return 'malay-text';
+        case 'en': return 'english-text';
+        default: return '';
+    }
+}
+
+// 8. List Translations
+async function loadTranslations() {
+    try {
+        const data = await apiRequest('/api/translations');
+        const container = document.getElementById('translations-result');
+        
+        let html = '<h3>Available Translations:</h3>';
+        
+        data.forEach(translation => {
+            html += `
+                <div class="verse-card">
+                    <h4>${translation.name}</h4>
+                    <p><strong>Language:</strong> ${translation.language_name} (${translation.language})</p>
+                    <p><strong>Translator:</strong> ${translation.translator}</p>
+                    <p><strong>Key:</strong> ${translation.key}</p>
+                    ${translation.source ? `<p><strong>Source:</strong> ${translation.source}</p>` : ''}
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+    } catch (error) {
+        console.error('Failed to load translations:', error);
+    }
+}
+
+// 9. Statistics
+async function loadStatistics() {
+    try {
+        const data = await apiRequest('/api/stats');
+        const container = document.getElementById('stats-result');
+        
+        container.innerHTML = `
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">${data.totalChapters}</div>
+                    <div class="stat-label">Total Chapters</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.totalVerses}</div>
+                    <div class="stat-label">Total Verses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.totalTokens?.toLocaleString() || data.totalTokens}</div>
+                    <div class="stat-label">Total Tokens</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.averageVersesPerChapter}</div>
+                    <div class="stat-label">Avg Verses/Chapter</div>
+                </div>
+                ${data.averageTokensPerVerse ? `
+                <div class="stat-card">
+                    <div class="stat-value">${data.averageTokensPerVerse}</div>
+                    <div class="stat-label">Avg Tokens/Verse</div>
+                </div>
+                ` : ''}
+            </div>
+            
+            <div class="verse-card">
+                <h4>📏 Longest Chapter:</h4>
+                <p><strong>Chapter ${data.longestChapter.number}:</strong> ${data.longestChapter.name}</p>
+                <p><strong>Verses:</strong> ${data.longestChapter.verses}</p>
+            </div>
+            
+            <div class="verse-card">
+                <h4>📐 Shortest Chapter:</h4>
+                <p><strong>Chapter ${data.shortestChapter.number}:</strong> ${data.shortestChapter.name}</p>
+                <p><strong>Verses:</strong> ${data.shortestChapter.verses}</p>
+            </div>
+            
+            <div class="verse-card">
+                <h4>📊 Additional Statistics:</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                    <div style="background: #f8f9ff; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
+                        <strong>Chapter Range:</strong><br>
+                        Shortest: ${data.shortestChapter.verses} verses<br>
+                        Longest: ${data.longestChapter.verses} verses
+                    </div>
+                    <div style="background: #fff8f0; padding: 15px; border-radius: 8px; border-left: 4px solid #764ba2;">
+                        <strong>Text Analysis:</strong><br>
+                        ${data.totalTokens?.toLocaleString() || data.totalTokens} total tokens<br>
+                        ${data.averageTokensPerVerse || 'N/A'} avg tokens per verse
+                    </div>
+                </div>
+            </div>
+            
+            <details style="margin-top: 20px;">
+                <summary style="cursor: pointer; color: #667eea; font-weight: bold; padding: 10px; background: #f8f9ff; border-radius: 5px;">View Raw Statistics Data</summary>
+                <pre style="background: #f0f0f0; padding: 15px; border-radius: 5px; margin-top: 10px; overflow-x: auto; font-size: 0.9rem;">${JSON.stringify(data, null, 2)}</pre>
+            </details>
+        `;
+    } catch (error) {
+        console.error('Failed to load statistics:', error);
+    }
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + Enter to trigger search in active tab
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        const activeTab = document.querySelector('.tab-content.active');
+        if (activeTab) {
+            const searchBtn = activeTab.querySelector('.btn.primary');
+            if (searchBtn) {
+                searchBtn.click();
+            }
+        }
+    }
+    
+    // Escape to close modal
+    if (e.key === 'Escape') {
+        closeErrorModal();
+    }
+});
+
+// Auto-focus on input fields when switching tabs
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        setTimeout(() => {
+            const activeTab = document.querySelector('.tab-content.active');
+            const firstInput = activeTab.querySelector('input[type="text"], input[type="number"]');
+            if (firstInput) {
+                firstInput.focus();
+            }
+        }, 100);
+    });
+});
+
+// Add loading states to buttons
+function addButtonLoading(button) {
+    const originalText = button.textContent;
+    button.textContent = 'Loading...';
+    button.disabled = true;
+    
+    return () => {
+        button.textContent = originalText;
+        button.disabled = false;
+    };
+}
+
+// Enhanced error handling with retry functionality
+function createRetryableError(message, retryFn) {
+    const container = document.createElement('div');
+    container.innerHTML = `
+        <p>${message}</p>
+        <button onclick="(${retryFn.toString()})()" class="btn secondary" style="margin-top: 10px;">
+            Retry
+        </button>
+    `;
+    return container;
+}
+
+// Add copy functionality for results
+function addCopyButton(container) {
+    const copyBtn = document.createElement('button');
+    copyBtn.textContent = 'Copy Results';
+    copyBtn.className = 'btn secondary';
+    copyBtn.style.marginTop = '10px';
+    
+    copyBtn.onclick = () => {
+        const text = container.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => {
+                copyBtn.textContent = 'Copy Results';
+            }, 2000);
+        });
+    };
+    
+    container.appendChild(copyBtn);
+}
+
+// Initialize tooltips for better UX
+function initializeTooltips() {
+    const tooltips = {
+        'normalize': 'Enable Arabic text normalization for better matching',
+        'search-type': 'Exact: matches whole words, Substring: matches partial text',
+        'include-arabic': 'Include original Arabic text in translation search results'
+    };
+    
+    Object.entries(tooltips).forEach(([id, text]) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.title = text;
+        }
+    });
+}
+
+// Call initialization functions
+document.addEventListener('DOMContentLoaded', initializeTooltips);

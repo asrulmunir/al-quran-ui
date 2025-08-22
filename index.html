@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Al-Quran API Showcase</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Prevent favicon 404 error -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕌</text></svg>">
+    <!-- Arabic font support -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🕌 Al-Quran API Showcase</h1>
+            <p>Complete demonstration of all API functionalities</p>
+        </header>
+
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="info">API Info</button>
+            <button class="tab-btn" data-tab="chapters">Chapters</button>
+            <button class="tab-btn" data-tab="verses">Verses</button>
+            <button class="tab-btn" data-tab="compare">Compare</button>
+            <button class="tab-btn" data-tab="search">Search Arabic</button>
+            <button class="tab-btn" data-tab="search-translation">Search Translation</button>
+            <button class="tab-btn" data-tab="translations">Translations</button>
+            <button class="tab-btn" data-tab="stats">Statistics</button>
+            <button class="tab-btn" data-tab="attribution">Attribution</button>
+        </nav>
+
+        <main>
+            <!-- API Info Tab -->
+            <div class="tab-content active" id="info">
+                <div class="section">
+                    <h2>📊 API Information</h2>
+                    <p>Click the button below to load basic statistics and information about the Al-Quran API.</p>
+                    <button onclick="loadApiInfo()" class="btn primary">Load API Info</button>
+                    <div id="api-info-result" class="result-container"></div>
+                </div>
+            </div>
+
+            <!-- Chapters Tab -->
+            <div class="tab-content" id="chapters">
+                <div class="section">
+                    <h2>📚 All Chapters</h2>
+                    <p>Browse all 114 chapters of the Quran with basic information. Click on any chapter card to view its complete content.</p>
+                    <button onclick="loadChapters()" class="btn primary">Load All Chapters</button>
+                    <div id="chapters-result" class="result-container"></div>
+                </div>
+                
+                <div class="section">
+                    <h2>📖 Get Specific Chapter</h2>
+                    <p>Enter a chapter number to view the complete chapter with all verses in Arabic text.</p>
+                    <div class="form-group">
+                        <label for="chapter-id">Chapter Number (1-114):</label>
+                        <input type="number" id="chapter-id" min="1" max="114" value="1" placeholder="Enter chapter number">
+                        <button onclick="loadChapter()" class="btn primary">Get Chapter</button>
+                    </div>
+                    <div id="chapter-result" class="result-container"></div>
+                </div>
+            </div>
+
+            <!-- Verses Tab -->
+            <div class="tab-content" id="verses">
+                <div class="section">
+                    <h2>📝 Get Specific Verse</h2>
+                    <p>Select a chapter and verse to view detailed information including Arabic text and token analysis.</p>
+                    <div class="form-group">
+                        <label for="verse-chapter-select">Chapter:</label>
+                        <select id="verse-chapter-select" onchange="updateVerseRange()">
+                            <option value="">Loading chapters...</option>
+                        </select>
+                        
+                        <label for="verse-number-select">Verse:</label>
+                        <select id="verse-number-select">
+                            <option value="">Select chapter first</option>
+                        </select>
+                        
+                        <button onclick="loadVerse()" class="btn primary">Get Verse</button>
+                    </div>
+                    <div class="quick-verses">
+                        <h3>Quick Access to Famous Verses:</h3>
+                        <button onclick="loadSpecificVerse(1, 1)" class="btn secondary">Bismillah (1:1)</button>
+                        <button onclick="loadSpecificVerse(2, 255)" class="btn secondary">Ayat al-Kursi (2:255)</button>
+                        <button onclick="loadSpecificVerse(112, 1)" class="btn secondary">Al-Ikhlas (112:1)</button>
+                    </div>
+                    <div id="verse-result" class="result-container"></div>
+                </div>
+            </div>
+
+            <!-- Compare Tab -->
+            <div class="tab-content" id="compare">
+                <div class="section">
+                    <h2>🔄 Compare Translations</h2>
+                    <p>Select a chapter and verse to view Arabic text alongside English and Malay translations.</p>
+                    <div class="form-group">
+                        <label for="compare-chapter-select">Chapter:</label>
+                        <select id="compare-chapter-select" onchange="updateCompareVerseRange()">
+                            <option value="">Loading chapters...</option>
+                        </select>
+                        
+                        <label for="compare-verse-select">Verse:</label>
+                        <select id="compare-verse-select">
+                            <option value="">Select chapter first</option>
+                        </select>
+                        
+                        <button onclick="compareTranslations()" class="btn primary">Compare Translations</button>
+                    </div>
+                    <div id="compare-result" class="result-container"></div>
+                </div>
+            </div>
+
+            <!-- Search Arabic Tab -->
+            <div class="tab-content" id="search">
+                <div class="section">
+                    <h2>🔍 Search Arabic Text</h2>
+                    <p>Search for verses containing specific Arabic text with advanced options and translation support.</p>
+                    <div class="form-group">
+                        <label for="search-query">Arabic Search Query:</label>
+                        <input type="text" id="search-query" placeholder="Enter Arabic text (e.g., الله)" dir="rtl">
+                        
+                        <label for="search-type">Search Type:</label>
+                        <select id="search-type">
+                            <option value="substring">Substring</option>
+                            <option value="exact">Exact</option>
+                        </select>
+                        
+                        <label for="normalize">Normalize Text:</label>
+                        <input type="checkbox" id="normalize" checked>
+                        
+                        <label for="search-limit">Limit Results:</label>
+                        <input type="number" id="search-limit" min="1" max="100" value="10" placeholder="Max results">
+                        
+                        <div class="translation-options">
+                            <label for="show-translations">Show Translations:</label>
+                            <input type="checkbox" id="show-translations" onchange="toggleTranslationOptions()">
+                            
+                            <div id="translation-language-options" class="hidden">
+                                <label for="translation-language">Translation Language:</label>
+                                <select id="translation-language">
+                                    <option value="both">English & Malay</option>
+                                    <option value="all">All Languages</option>
+                                    <option value="en">English Only</option>
+                                    <option value="ms">Malay Only</option>
+                                    <option value="zh">Chinese Only</option>
+                                    <option value="ta">Tamil Only</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button onclick="searchArabic()" class="btn primary">Search</button>
+                    </div>
+                    
+                    <div class="quick-search">
+                        <h3>Quick Search Terms:</h3>
+                        <button onclick="quickSearchArabic('الله')" class="btn secondary">الله (Allah)</button>
+                        <button onclick="quickSearchArabic('رب')" class="btn secondary">رب (Lord)</button>
+                        <button onclick="quickSearchArabic('رحمن')" class="btn secondary">رحمن (Rahman)</button>
+                        <button onclick="quickSearchArabic('رحيم')" class="btn secondary">رحيم (Rahim)</button>
+                        <button onclick="quickSearchArabic('بسم')" class="btn secondary">بسم (Bismillah)</button>
+                    </div>
+                    
+                    <div id="search-result" class="result-container"></div>
+                </div>
+            </div>
+
+            <!-- Search Translation Tab -->
+            <div class="tab-content" id="search-translation">
+                <div class="section">
+                    <h2>🌐 Search Translations</h2>
+                    <p>Find verses by searching in English, Malay, Chinese, or Tamil translations - perfect for non-Arabic speakers!</p>
+                    <div class="form-group">
+                        <label for="translation-query">Search Query:</label>
+                        <input type="text" id="translation-query" placeholder="Enter text in English, Malay, Chinese, or Tamil">
+                        
+                        <label for="translation-lang">Language:</label>
+                        <select id="translation-lang">
+                            <option value="en">English</option>
+                            <option value="ms">Bahasa Melayu</option>
+                            <option value="zh">中文 (Chinese)</option>
+                            <option value="ta">தமிழ் (Tamil)</option>
+                        </select>
+                        
+                        <label for="translation-type">Search Type:</label>
+                        <select id="translation-type">
+                            <option value="substring">Substring</option>
+                            <option value="exact">Exact</option>
+                        </select>
+                        
+                        <label for="include-arabic">Include Arabic:</label>
+                        <input type="checkbox" id="include-arabic" checked>
+                        
+                        <label for="translation-limit">Limit Results:</label>
+                        <input type="number" id="translation-limit" min="1" max="100" value="10" placeholder="Max results">
+                        
+                        <button onclick="searchTranslation()" class="btn primary">Search</button>
+                    </div>
+                    
+                    <div class="quick-search">
+                        <h3>Quick English Search:</h3>
+                        <button onclick="quickSearchTranslation('mercy', 'en')" class="btn secondary">Mercy</button>
+                        <button onclick="quickSearchTranslation('forgiveness', 'en')" class="btn secondary">Forgiveness</button>
+                        <button onclick="quickSearchTranslation('guidance', 'en')" class="btn secondary">Guidance</button>
+                        <button onclick="quickSearchTranslation('paradise', 'en')" class="btn secondary">Paradise</button>
+                        <button onclick="quickSearchTranslation('prayer', 'en')" class="btn secondary">Prayer</button>
+                    </div>
+                    
+                    <div class="quick-search">
+                        <h3>Quick Malay Search:</h3>
+                        <button onclick="quickSearchTranslation('kasih', 'ms')" class="btn secondary">Kasih</button>
+                        <button onclick="quickSearchTranslation('ampun', 'ms')" class="btn secondary">Ampun</button>
+                        <button onclick="quickSearchTranslation('petunjuk', 'ms')" class="btn secondary">Petunjuk</button>
+                        <button onclick="quickSearchTranslation('syurga', 'ms')" class="btn secondary">Syurga</button>
+                        <button onclick="quickSearchTranslation('solat', 'ms')" class="btn secondary">Solat</button>
+                    </div>
+
+                    <div class="quick-search">
+                        <h3>Quick Chinese Search:</h3>
+                        <button onclick="quickSearchTranslation('慈悲', 'zh')" class="btn secondary">慈悲 (Mercy)</button>
+                        <button onclick="quickSearchTranslation('宽恕', 'zh')" class="btn secondary">宽恕 (Forgiveness)</button>
+                        <button onclick="quickSearchTranslation('指导', 'zh')" class="btn secondary">指导 (Guidance)</button>
+                        <button onclick="quickSearchTranslation('天堂', 'zh')" class="btn secondary">天堂 (Paradise)</button>
+                        <button onclick="quickSearchTranslation('祈祷', 'zh')" class="btn secondary">祈祷 (Prayer)</button>
+                    </div>
+
+                    <div class="quick-search">
+                        <h3>Quick Tamil Search:</h3>
+                        <button onclick="quickSearchTranslation('கருணை', 'ta')" class="btn secondary">கருணை (Mercy)</button>
+                        <button onclick="quickSearchTranslation('மன்னிப்பு', 'ta')" class="btn secondary">மன்னிப்பு (Forgiveness)</button>
+                        <button onclick="quickSearchTranslation('வழிகாட்டுதல்', 'ta')" class="btn secondary">வழிகாட்டுதல் (Guidance)</button>
+                        <button onclick="quickSearchTranslation('சொர்க்கம்', 'ta')" class="btn secondary">சொர்க்கம் (Paradise)</button>
+                        <button onclick="quickSearchTranslation('தொழுகை', 'ta')" class="btn secondary">தொழுகை (Prayer)</button>
+                    </div>
+                    
+                    <div id="search-translation-result" class="result-container"></div>
+                </div>
+            </div>
+
+            <!-- Translations Tab -->
+            <div class="tab-content" id="translations">
+                <div class="section">
+                    <h2>🌍 Available Translations</h2>
+                    <p>View all available translations with translator information and language details.</p>
+                    <button onclick="loadTranslations()" class="btn primary">Load Available Translations</button>
+                    <div id="translations-result" class="result-container"></div>
+                </div>
+            </div>
+
+            <!-- Statistics Tab -->
+            <div class="tab-content" id="stats">
+                <div class="section">
+                    <h2>📈 Quran Statistics</h2>
+                    <p>Get comprehensive statistics about the Quran including chapter and verse counts, longest and shortest chapters.</p>
+                    <button onclick="loadStatistics()" class="btn primary">Load Statistics</button>
+                    <div id="stats-result" class="result-container"></div>
+                </div>
+            </div>
+
+            <!-- Data Source & Attribution Tab -->
+            <div class="tab-content" id="attribution">
+                <div class="section">
+                    <h2>📜 Data Source & Attribution</h2>
+                    <p>This application uses authentic Islamic sources with proper attribution and licensing. All content is handled with utmost respect for the sacred nature of the Quran.</p>
+                </div>
+
+                <div class="section">
+                    <h2>📖 Quran Text</h2>
+                    <div class="attribution-card">
+                        <div class="attribution-item">
+                            <strong>Source:</strong> <a href="http://tanzil.net/" target="_blank" rel="noopener">Tanzil.net</a> - Uthmani text
+                        </div>
+                        <div class="attribution-item">
+                            <strong>License:</strong> <a href="https://creativecommons.org/licenses/by-nd/3.0/" target="_blank" rel="noopener">Creative Commons Attribution-NoDerivs 3.0 Unported (CC BY-ND 3.0)</a>
+                        </div>
+                        <div class="attribution-item">
+                            <strong>Attribution:</strong> Quran text courtesy of Tanzil.net
+                        </div>
+                        <div class="attribution-item">
+                            <strong>Script:</strong> Uthmani script following the Mushaf of Madinah
+                        </div>
+                        <div class="attribution-item">
+                            <strong>Coverage:</strong> Complete 114 chapters, 6,236 verses
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>🌐 Translations</h2>
+                    
+                    <div class="translation-attribution">
+                        <h3>English Translation</h3>
+                        <div class="attribution-card">
+                            <div class="attribution-item">
+                                <strong>Translators:</strong> Dr. Muhammad Taqi-ud-Din Al-Hilali and Dr. Muhammad Muhsin Khan
+                            </div>
+                            <div class="attribution-item">
+                                <strong>Title:</strong> The Noble Quran - English Translation
+                            </div>
+                            <div class="attribution-item">
+                                <strong>Source:</strong> <a href="http://tanzil.net/" target="_blank" rel="noopener">Tanzil.net</a>
+                            </div>
+                            <div class="attribution-item">
+                                <strong>License:</strong> Non-commercial use with attribution
+                            </div>
+                            <div class="attribution-item">
+                                <strong>Coverage:</strong> Complete 114 chapters, 6,236 verses
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="translation-attribution">
+                        <h3>Malay Translation</h3>
+                        <div class="attribution-card">
+                            <div class="attribution-item">
+                                <strong>Translator:</strong> Abdullah Muhammad Basmeih
+                            </div>
+                            <div class="attribution-item">
+                                <strong>Title:</strong> Al-Quran - Terjemahan Bahasa Melayu
+                            </div>
+                            <div class="attribution-item">
+                                <strong>Source:</strong> <a href="http://tanzil.net/" target="_blank" rel="noopener">Tanzil.net</a>
+                            </div>
+                            <div class="attribution-item">
+                                <strong>License:</strong> Non-commercial use with attribution
+                            </div>
+                            <div class="attribution-item">
+                                <strong>Coverage:</strong> Complete 114 chapters, 6,236 verses
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>⚙️ API Software</h2>
+                    <div class="attribution-card">
+                        <div class="attribution-item">
+                            <strong>License:</strong> <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener">GPL-3.0</a> (maintaining compatibility with original JQuranTree project)
+                        </div>
+                        <div class="attribution-item">
+                            <strong>Attribution:</strong> Based on JQuranTree library, adapted for Cloudflare Workers
+                        </div>
+                        <div class="attribution-item">
+                            <strong>Open Source:</strong> Available for anyone to deploy and customize
+                        </div>
+                        <div class="attribution-item">
+                            <strong>API Endpoint:</strong> <a href="https://quran-api.asrulmunir.workers.dev" target="_blank" rel="noopener">https://quran-api.asrulmunir.workers.dev</a>
+                        </div>
+                        <div class="attribution-item">
+                            <strong>Documentation:</strong> <a href="https://quran-api.asrulmunir.workers.dev/api/LLM" target="_blank" rel="noopener">API Documentation</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>🕌 Islamic Etiquette</h2>
+                    <div class="islamic-etiquette">
+                        <div class="etiquette-item">
+                            <strong>Respectful Handling:</strong> This application handles Quranic content with utmost respect and reverence for the sacred nature of the text.
+                        </div>
+                        <div class="etiquette-item">
+                            <strong>Proper Attribution:</strong> All translators and sources are properly credited to honor their scholarly contributions.
+                        </div>
+                        <div class="etiquette-item">
+                            <strong>Educational Purpose:</strong> This application is designed for educational, research, and spiritual purposes.
+                        </div>
+                        <div class="etiquette-item">
+                            <strong>Accuracy:</strong> While every effort is made to ensure accuracy, users are encouraged to consult traditional printed Mushafs for formal study and recitation.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>💻 About This Application</h2>
+                    <div class="attribution-card">
+                        <div class="attribution-item">
+                            <strong>Purpose:</strong> Demonstration and educational showcase of the Al-Quran API
+                        </div>
+                        <div class="attribution-item">
+                            <strong>Technology:</strong> Built with vanilla HTML, CSS, and JavaScript (no frameworks)
+                        </div>
+                        <div class="attribution-item">
+                            <strong>Features:</strong> Complete showcase of all 8 API endpoints with interactive interface
+                        </div>
+                        <div class="attribution-item">
+                            <strong>Open Source:</strong> Educational demonstration available for learning and reference
+                        </div>
+                        <div class="attribution-item">
+                            <strong>Note:</strong> This is a client-side demonstration app. For production use, consider proper hosting, caching, and rate limiting strategies.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Loading...</p>
+        </div>
+
+        <div id="error-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close" onclick="closeErrorModal()">&times;</span>
+                <h3>Error</h3>
+                <p id="error-message"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
