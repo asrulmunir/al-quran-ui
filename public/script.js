@@ -969,8 +969,20 @@ function updateScreenshotPreview(verseData, translationData, translationLang) {
     const translationTextEl = document.getElementById('screenshot-translation-text');
     const attributionEl = document.getElementById('screenshot-attribution');
     
-    // Update chapter name and reference
-    chapterNameEl.textContent = verseData.chapterName || `Chapter ${verseData.chapterNumber}`;
+    // Update chapter name with both English and Arabic
+    const englishName = verseData.chapterName || `Chapter ${verseData.chapterNumber}`;
+    const arabicName = verseData.chapterNameArabic || '';
+    
+    if (arabicName) {
+        chapterNameEl.innerHTML = `
+            <div class="chapter-name-english">${englishName}</div>
+            <div class="chapter-name-arabic">${arabicName}</div>
+        `;
+    } else {
+        chapterNameEl.textContent = englishName;
+    }
+    
+    // Update verse reference
     verseReferenceEl.textContent = `${verseData.chapterNumber}:${verseData.verseNumber}`;
     
     // Update Arabic text

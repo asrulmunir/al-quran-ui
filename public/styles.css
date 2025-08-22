@@ -788,6 +788,22 @@ select:focus {
     color: #2c3e50;
 }
 
+.chapter-name-english {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: #2c3e50;
+}
+
+.chapter-name-arabic {
+    font-family: 'Amiri', 'Traditional Arabic', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    direction: rtl;
+    color: #34495e;
+    margin-bottom: 8px;
+}
+
 .verse-reference {
     font-size: 1.1rem;
     opacity: 0.8;
@@ -837,6 +853,14 @@ select:focus {
     color: #ecf0f1;
 }
 
+.screenshot-preview.dark .chapter-name-english {
+    color: #ecf0f1;
+}
+
+.screenshot-preview.dark .chapter-name-arabic {
+    color: #bdc3c7;
+}
+
 .screenshot-preview.dark .arabic-verse {
     color: #ffffff;
 }
@@ -851,6 +875,8 @@ select:focus {
 }
 
 .screenshot-preview.gradient .chapter-name,
+.screenshot-preview.gradient .chapter-name-english,
+.screenshot-preview.gradient .chapter-name-arabic,
 .screenshot-preview.gradient .arabic-verse,
 .screenshot-preview.gradient .translation-verse {
     color: #ffffff;
@@ -862,6 +888,8 @@ select:focus {
 }
 
 .screenshot-preview.islamic .chapter-name,
+.screenshot-preview.islamic .chapter-name-english,
+.screenshot-preview.islamic .chapter-name-arabic,
 .screenshot-preview.islamic .arabic-verse,
 .screenshot-preview.islamic .translation-verse {
     color: #ffffff;
@@ -876,8 +904,13 @@ select:focus {
     font-size: 1.1rem;
 }
 
-.screenshot-preview.small .chapter-name {
+.screenshot-preview.small .chapter-name,
+.screenshot-preview.small .chapter-name-english {
     font-size: 1.4rem;
+}
+
+.screenshot-preview.small .chapter-name-arabic {
+    font-size: 1.2rem;
 }
 
 .screenshot-preview.medium .arabic-verse {
@@ -888,8 +921,13 @@ select:focus {
     font-size: 1.4rem;
 }
 
-.screenshot-preview.medium .chapter-name {
+.screenshot-preview.medium .chapter-name,
+.screenshot-preview.medium .chapter-name-english {
     font-size: 1.8rem;
+}
+
+.screenshot-preview.medium .chapter-name-arabic {
+    font-size: 1.6rem;
 }
 
 .screenshot-preview.large .arabic-verse {
@@ -900,8 +938,13 @@ select:focus {
     font-size: 1.7rem;
 }
 
-.screenshot-preview.large .chapter-name {
+.screenshot-preview.large .chapter-name,
+.screenshot-preview.large .chapter-name-english {
     font-size: 2.2rem;
+}
+
+.screenshot-preview.large .chapter-name-arabic {
+    font-size: 2rem;
 }
 
 .screenshot-preview.extra-large .arabic-verse {
@@ -912,8 +955,13 @@ select:focus {
     font-size: 2rem;
 }
 
-.screenshot-preview.extra-large .chapter-name {
+.screenshot-preview.extra-large .chapter-name,
+.screenshot-preview.extra-large .chapter-name-english {
     font-size: 2.6rem;
+}
+
+.screenshot-preview.extra-large .chapter-name-arabic {
+    font-size: 2.4rem;
 }
 
 /* Language-specific fonts for screenshot */
@@ -941,8 +989,13 @@ select:focus {
         font-size: 1.2rem;
     }
     
-    .screenshot-preview.medium .chapter-name {
+    .screenshot-preview.medium .chapter-name,
+    .screenshot-preview.medium .chapter-name-english {
         font-size: 1.5rem;
+    }
+    
+    .screenshot-preview.medium .chapter-name-arabic {
+        font-size: 1.3rem;
     }
 }
 
