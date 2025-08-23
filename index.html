@@ -38,7 +38,6 @@
                 <button class="tab-btn" data-tab="translations">Translations</button>
                 <button class="tab-btn" data-tab="stats">Statistics</button>
                 <button class="tab-btn" data-tab="screenshot">Screenshot</button>
-                <button class="tab-btn" data-tab="attribution">Attribution</button>
             </div>
         </nav>
 
@@ -50,6 +49,82 @@
                     <p>Click the button below to load basic statistics and information about the Al-Quran API.</p>
                     <button onclick="loadApiInfo()" class="btn primary">Load API Info</button>
                     <div id="api-info-result" class="result-container"></div>
+                </div>
+
+                <!-- Data Sources & Attribution Section -->
+                <div class="section">
+                    <h2>📖 Data Sources & Attribution</h2>
+                    <p>This application uses authentic Islamic sources and provides proper attribution to all translators and content providers.</p>
+                    
+                    <div class="attribution-grid">
+                        <div class="attribution-card">
+                            <h3>📜 Arabic Text Source</h3>
+                            <div class="source-info">
+                                <p><strong>Source:</strong> Tanzil.net</p>
+                                <p><strong>Text Type:</strong> Uthmani Script</p>
+                                <p><strong>License:</strong> Creative Commons Attribution-NoDerivs 3.0</p>
+                                <p><strong>Description:</strong> The Uthmani script is based on the Mushaf of Madinah, following the Uthmani Rasm (orthography) as approved by the Islamic authorities.</p>
+                                <a href="https://tanzil.net" target="_blank" class="source-link">Visit Tanzil.net →</a>
+                            </div>
+                        </div>
+
+                        <div class="attribution-card">
+                            <h3>🇺🇸 English Translation</h3>
+                            <div class="source-info">
+                                <p><strong>Translators:</strong> Dr. Muhammad Taqi-ud-Din Al-Hilali and Dr. Muhammad Muhsin Khan</p>
+                                <p><strong>Title:</strong> "The Noble Quran"</p>
+                                <p><strong>Publisher:</strong> King Fahd Complex for the Printing of the Holy Quran</p>
+                                <p><strong>Description:</strong> A widely accepted English translation known for its clarity and adherence to Islamic scholarship.</p>
+                            </div>
+                        </div>
+
+                        <div class="attribution-card">
+                            <h3>🇲🇾 Malay Translation</h3>
+                            <div class="source-info">
+                                <p><strong>Translator:</strong> Abdullah Muhammad Basmeih</p>
+                                <p><strong>Title:</strong> "Tafsir Pimpinan Ar-Rahman"</p>
+                                <p><strong>Authority:</strong> Department of Islamic Development Malaysia (JAKIM)</p>
+                                <p><strong>Description:</strong> The official Malay translation used in Malaysia, known for its accuracy and scholarly approach.</p>
+                            </div>
+                        </div>
+
+                        <div class="attribution-card">
+                            <h3>🇨🇳 Chinese Translation</h3>
+                            <div class="source-info">
+                                <p><strong>Translator:</strong> Ma Jian (马坚)</p>
+                                <p><strong>Language:</strong> Simplified Chinese (中文 简体)</p>
+                                <p><strong>Institution:</strong> Beijing Foreign Studies University</p>
+                                <p><strong>Description:</strong> A respected Chinese translation by the renowned Islamic scholar Ma Jian, widely used in Chinese-speaking communities.</p>
+                            </div>
+                        </div>
+
+                        <div class="attribution-card">
+                            <h3>🇮🇳 Tamil Translation</h3>
+                            <div class="source-info">
+                                <p><strong>Translator:</strong> Jan Turst Foundation</p>
+                                <p><strong>Language:</strong> Tamil (தமிழ்)</p>
+                                <p><strong>Region:</strong> South India and Sri Lanka</p>
+                                <p><strong>Description:</strong> A comprehensive Tamil translation serving the Tamil-speaking Muslim community worldwide.</p>
+                            </div>
+                        </div>
+
+                        <div class="attribution-card">
+                            <h3>🔧 Technical Attribution</h3>
+                            <div class="source-info">
+                                <p><strong>API Developer:</strong> Asrul Munir</p>
+                                <p><strong>API Endpoint:</strong> quran-api.asrulmunir.workers.dev</p>
+                                <p><strong>Web App:</strong> Al-Quran API Showcase</p>
+                                <p><strong>Platform:</strong> Cloudflare Workers</p>
+                                <p><strong>Repository:</strong> <a href="https://github.com/asrulmunir/al-quran-ui" target="_blank">GitHub →</a></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="islamic-notice">
+                        <h3>🕌 Islamic Etiquette Notice</h3>
+                        <p>This application handles the Holy Quran with utmost respect and reverence. All content is presented following Islamic guidelines for digital Quranic text. Users are encouraged to maintain proper adab (etiquette) when interacting with the sacred text.</p>
+                        <p><strong>May Allah accept this effort and make it beneficial for the Muslim Ummah. Ameen.</strong></p>
+                    </div>
                 </div>
             </div>
 
@@ -348,189 +423,6 @@
                             <div class="attribution" id="screenshot-attribution">
                                 Al-Quran API Showcase
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Data Source & Attribution Tab -->
-            <div class="tab-content" id="attribution">
-                <div class="section">
-                    <h2>📜 Data Source & Attribution</h2>
-                    <p>This application uses authentic Islamic sources with proper attribution and licensing. All content is handled with utmost respect for the sacred nature of the Quran. The app supports translations in four languages: English, Malay, Chinese (Simplified), and Tamil.</p>
-                </div>
-
-                <div class="section">
-                    <h2>📖 Quran Text</h2>
-                    <div class="attribution-card">
-                        <div class="attribution-item">
-                            <strong>Source:</strong> <a href="http://tanzil.net/" target="_blank" rel="noopener">Tanzil.net</a> - Uthmani text
-                        </div>
-                        <div class="attribution-item">
-                            <strong>License:</strong> <a href="https://creativecommons.org/licenses/by-nd/3.0/" target="_blank" rel="noopener">Creative Commons Attribution-NoDerivs 3.0 Unported (CC BY-ND 3.0)</a>
-                        </div>
-                        <div class="attribution-item">
-                            <strong>Attribution:</strong> Quran text courtesy of Tanzil.net
-                        </div>
-                        <div class="attribution-item">
-                            <strong>Script:</strong> Uthmani script following the Mushaf of Madinah
-                        </div>
-                        <div class="attribution-item">
-                            <strong>Coverage:</strong> Complete 114 chapters, 6,236 verses
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <h2>🌐 Translations</h2>
-                    
-                    <div class="translation-attribution">
-                        <h3>English Translation</h3>
-                        <div class="attribution-card">
-                            <div class="attribution-item">
-                                <strong>Translators:</strong> Dr. Muhammad Taqi-ud-Din Al-Hilali and Dr. Muhammad Muhsin Khan
-                            </div>
-                            <div class="attribution-item">
-                                <strong>Title:</strong> The Noble Quran - English Translation
-                            </div>
-                            <div class="attribution-item">
-                                <strong>Source:</strong> <a href="http://tanzil.net/" target="_blank" rel="noopener">Tanzil.net</a>
-                            </div>
-                            <div class="attribution-item">
-                                <strong>License:</strong> Non-commercial use with attribution
-                            </div>
-                            <div class="attribution-item">
-                                <strong>Coverage:</strong> Complete 114 chapters, 6,236 verses
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="translation-attribution">
-                        <h3>Malay Translation</h3>
-                        <div class="attribution-card">
-                            <div class="attribution-item">
-                                <strong>Translator:</strong> Abdullah Muhammad Basmeih
-                            </div>
-                            <div class="attribution-item">
-                                <strong>Title:</strong> Al-Quran - Terjemahan Bahasa Melayu
-                            </div>
-                            <div class="attribution-item">
-                                <strong>Source:</strong> <a href="http://tanzil.net/" target="_blank" rel="noopener">Tanzil.net</a>
-                            </div>
-                            <div class="attribution-item">
-                                <strong>License:</strong> Non-commercial use with attribution
-                            </div>
-                            <div class="attribution-item">
-                                <strong>Coverage:</strong> Complete 114 chapters, 6,236 verses
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="translation-attribution">
-                        <h3>Chinese Translation (中文)</h3>
-                        <div class="attribution-card">
-                            <div class="attribution-item">
-                                <strong>Translator:</strong> Ma Jian (马坚)
-                            </div>
-                            <div class="attribution-item">
-                                <strong>Title:</strong> The Noble Quran - Chinese Translation
-                            </div>
-                            <div class="attribution-item">
-                                <strong>Language:</strong> 中文 (简体) - Simplified Chinese
-                            </div>
-                            <div class="attribution-item">
-                                <strong>Source:</strong> <a href="http://tanzil.net/" target="_blank" rel="noopener">Tanzil.net</a>
-                            </div>
-                            <div class="attribution-item">
-                                <strong>License:</strong> Non-commercial use with attribution
-                            </div>
-                            <div class="attribution-item">
-                                <strong>Coverage:</strong> Complete 114 chapters, 6,236 verses
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="translation-attribution">
-                        <h3>Tamil Translation (தமிழ்)</h3>
-                        <div class="attribution-card">
-                            <div class="attribution-item">
-                                <strong>Translator:</strong> Jan Turst Foundation
-                            </div>
-                            <div class="attribution-item">
-                                <strong>Title:</strong> The Noble Quran - Tamil Translation
-                            </div>
-                            <div class="attribution-item">
-                                <strong>Language:</strong> தமிழ் - Tamil
-                            </div>
-                            <div class="attribution-item">
-                                <strong>Source:</strong> <a href="http://tanzil.net/" target="_blank" rel="noopener">Tanzil.net</a>
-                            </div>
-                            <div class="attribution-item">
-                                <strong>License:</strong> Non-commercial use with attribution
-                            </div>
-                            <div class="attribution-item">
-                                <strong>Coverage:</strong> Complete 114 chapters, 6,236 verses
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <h2>⚙️ API Software</h2>
-                    <div class="attribution-card">
-                        <div class="attribution-item">
-                            <strong>License:</strong> <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener">GPL-3.0</a> (maintaining compatibility with original JQuranTree project)
-                        </div>
-                        <div class="attribution-item">
-                            <strong>Attribution:</strong> Based on JQuranTree library, adapted for Cloudflare Workers
-                        </div>
-                        <div class="attribution-item">
-                            <strong>Open Source:</strong> Available for anyone to deploy and customize
-                        </div>
-                        <div class="attribution-item">
-                            <strong>API Endpoint:</strong> <a href="https://quran-api.asrulmunir.workers.dev" target="_blank" rel="noopener">https://quran-api.asrulmunir.workers.dev</a>
-                        </div>
-                        <div class="attribution-item">
-                            <strong>Documentation:</strong> <a href="https://quran-api.asrulmunir.workers.dev/api/LLM" target="_blank" rel="noopener">API Documentation</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <h2>🕌 Islamic Etiquette</h2>
-                    <div class="islamic-etiquette">
-                        <div class="etiquette-item">
-                            <strong>Respectful Handling:</strong> This application handles Quranic content with utmost respect and reverence for the sacred nature of the text.
-                        </div>
-                        <div class="etiquette-item">
-                            <strong>Proper Attribution:</strong> All translators and sources are properly credited to honor their scholarly contributions.
-                        </div>
-                        <div class="etiquette-item">
-                            <strong>Educational Purpose:</strong> This application is designed for educational, research, and spiritual purposes.
-                        </div>
-                        <div class="etiquette-item">
-                            <strong>Accuracy:</strong> While every effort is made to ensure accuracy, users are encouraged to consult traditional printed Mushafs for formal study and recitation.
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <h2>💻 About This Application</h2>
-                    <div class="attribution-card">
-                        <div class="attribution-item">
-                            <strong>Purpose:</strong> Demonstration and educational showcase of the Al-Quran API
-                        </div>
-                        <div class="attribution-item">
-                            <strong>Technology:</strong> Built with vanilla HTML, CSS, and JavaScript (no frameworks)
-                        </div>
-                        <div class="attribution-item">
-                            <strong>Features:</strong> Complete showcase of all 8 API endpoints with interactive interface
-                        </div>
-                        <div class="attribution-item">
-                            <strong>Open Source:</strong> Educational demonstration available for learning and reference
-                        </div>
-                        <div class="attribution-item">
-                            <strong>Note:</strong> This is a client-side demonstration app. For production use, consider proper hosting, caching, and rate limiting strategies.
                         </div>
                     </div>
                 </div>
