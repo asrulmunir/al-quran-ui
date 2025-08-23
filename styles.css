@@ -47,6 +47,51 @@ header p {
     padding: 10px;
     border-radius: 15px;
     backdrop-filter: blur(10px);
+    position: relative;
+}
+
+/* Mobile menu toggle button */
+.mobile-menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 30px;
+    height: 30px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 10;
+}
+
+.hamburger-line {
+    width: 25px;
+    height: 3px;
+    background-color: white;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    transform-origin: center;
+}
+
+/* Hamburger animation when active */
+.mobile-menu-toggle.active .hamburger-line:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+}
+
+.mobile-menu-toggle.active .hamburger-line:nth-child(2) {
+    opacity: 0;
+}
+
+.mobile-menu-toggle.active .hamburger-line:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Navigation content container */
+.tab-nav-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    width: 100%;
 }
 
 .tab-btn {
@@ -1054,6 +1099,79 @@ select:focus {
 
 .screenshot-preview .translation-verse.tamil {
     font-family: 'Noto Sans Tamil', 'Latha', 'Tamil Sangam MN', sans-serif;
+}
+
+/* Mobile Navigation Styles */
+@media (max-width: 768px) {
+    .tab-nav {
+        flex-direction: column;
+        padding: 15px;
+    }
+    
+    .mobile-menu-toggle {
+        display: flex;
+        align-self: flex-start;
+        margin-bottom: 10px;
+    }
+    
+    .tab-nav-content {
+        display: none;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+    }
+    
+    .tab-nav-content.show {
+        display: flex;
+        max-height: 500px;
+        animation: slideDown 0.3s ease-out;
+    }
+    
+    .tab-btn {
+        width: 100%;
+        text-align: left;
+        padding: 12px 16px;
+        margin: 0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        min-width: auto;
+        flex: none;
+    }
+    
+    .tab-btn.active {
+        background: rgba(255, 255, 255, 0.25);
+        transform: none;
+    }
+    
+    .tab-btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: none;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Desktop styles - ensure menu is always visible */
+@media (min-width: 769px) {
+    .mobile-menu-toggle {
+        display: none !important;
+    }
+    
+    .tab-nav-content {
+        display: flex !important;
+    }
 }
 
 /* Responsive adjustments for screenshot */

@@ -27,6 +27,9 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.classList.add('active');
             document.getElementById(tabId).classList.add('active');
             
+            // Close mobile menu when tab is selected
+            closeMobileMenuOnTabSelect();
+            
             // Load chapters data when verses, compare, or screenshot tab is activated
             if ((tabId === 'verses' || tabId === 'compare' || tabId === 'screenshot') && chaptersData.length === 0) {
                 loadChaptersForDropdown();
@@ -1102,6 +1105,28 @@ function adjustFontSizeForContent() {
         preview.classList.add('auto-tiny');
     } else if (totalLength > 300) {
         preview.classList.add('auto-small');
+    }
+}
+
+// Mobile menu toggle function
+function toggleMobileMenu() {
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    const navContent = document.querySelector('.tab-nav-content');
+    
+    if (menuToggle && navContent) {
+        menuToggle.classList.toggle('active');
+        navContent.classList.toggle('show');
+    }
+}
+
+// Close mobile menu when a tab is selected
+function closeMobileMenuOnTabSelect() {
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    const navContent = document.querySelector('.tab-nav-content');
+    
+    if (window.innerWidth <= 768 && menuToggle && navContent) {
+        menuToggle.classList.remove('active');
+        navContent.classList.remove('show');
     }
 }
 

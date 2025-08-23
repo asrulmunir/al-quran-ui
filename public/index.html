@@ -20,16 +20,26 @@
         </header>
 
         <nav class="tab-nav">
-            <button class="tab-btn active" data-tab="info">API Info</button>
-            <button class="tab-btn" data-tab="chapters">Chapters</button>
-            <button class="tab-btn" data-tab="verses">Verses</button>
-            <button class="tab-btn" data-tab="compare">Compare</button>
-            <button class="tab-btn" data-tab="search">Search Arabic</button>
-            <button class="tab-btn" data-tab="search-translation">Search Translation</button>
-            <button class="tab-btn" data-tab="translations">Translations</button>
-            <button class="tab-btn" data-tab="stats">Statistics</button>
-            <button class="tab-btn" data-tab="screenshot">Screenshot</button>
-            <button class="tab-btn" data-tab="attribution">Attribution</button>
+            <!-- Mobile hamburger menu button -->
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle navigation menu">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+            
+            <!-- Navigation tabs -->
+            <div class="tab-nav-content">
+                <button class="tab-btn active" data-tab="info">API Info</button>
+                <button class="tab-btn" data-tab="chapters">Chapters</button>
+                <button class="tab-btn" data-tab="verses">Verses</button>
+                <button class="tab-btn" data-tab="compare">Compare</button>
+                <button class="tab-btn" data-tab="search">Search Arabic</button>
+                <button class="tab-btn" data-tab="search-translation">Search Translation</button>
+                <button class="tab-btn" data-tab="translations">Translations</button>
+                <button class="tab-btn" data-tab="stats">Statistics</button>
+                <button class="tab-btn" data-tab="screenshot">Screenshot</button>
+                <button class="tab-btn" data-tab="attribution">Attribution</button>
+            </div>
         </nav>
 
         <main>
