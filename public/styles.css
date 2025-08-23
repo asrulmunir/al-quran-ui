@@ -882,6 +882,7 @@ select:focus {
     opacity: 0.6;
     font-weight: 500;
     white-space: nowrap;
+    z-index: 5;
 }
 
 /* Theme Styles */
@@ -1174,12 +1175,37 @@ select:focus {
     }
 }
 
+/* Very small mobile screens */
+@media (max-width: 480px) {
+    .screenshot-preview {
+        padding: 25px 15px 45px 15px;
+        min-height: 450px;
+    }
+    
+    .attribution {
+        bottom: 5px;
+        left: 5px;
+        right: 5px;
+        text-align: center;
+        font-size: 0.65rem;
+        opacity: 0.7;
+        white-space: normal;
+        line-height: 1.1;
+    }
+    
+    .screenshot-preview.auto-micro .attribution,
+    .screenshot-preview.auto-tiny .attribution {
+        font-size: 0.6rem;
+        bottom: 3px;
+    }
+}
+
 /* Responsive adjustments for screenshot */
 @media (max-width: 900px) {
     .screenshot-preview {
         width: 95%;
         min-height: 500px;
-        padding: 30px 20px;
+        padding: 30px 20px 50px 20px; /* Added bottom padding for attribution */
     }
     
     .screenshot-preview.medium .arabic-verse {
@@ -1201,10 +1227,14 @@ select:focus {
     
     .attribution {
         position: absolute;
-        bottom: 10px;
-        right: 15px;
+        bottom: 8px;
+        right: 10px;
+        left: 10px;
+        text-align: center;
         font-size: 0.7rem;
-        opacity: 0.5;
+        opacity: 0.6;
+        white-space: normal;
+        line-height: 1.2;
     }
 }
 
