@@ -30,9 +30,16 @@ document.addEventListener('DOMContentLoaded', function() {
             // Close mobile menu when tab is selected
             closeMobileMenuOnTabSelect();
             
-            // Load chapters data when verses, compare, or screenshot tab is activated
-            if ((tabId === 'verses' || tabId === 'compare' || tabId === 'screenshot') && chaptersData.length === 0) {
+            // Load chapters data when verses, compare, screenshot, or flashcard tab is activated
+            if ((tabId === 'verses' || tabId === 'compare' || tabId === 'screenshot' || tabId === 'flashcard') && chaptersData.length === 0) {
                 loadChaptersForDropdown();
+            }
+            
+            // Initialize flashcard chapter dropdown
+            if (tabId === 'flashcard') {
+                setTimeout(() => {
+                    populateFlashcardChapterDropdown();
+                }, 100);
             }
             
             // Ensure screenshot dropdown is populated immediately
@@ -1130,6 +1137,218 @@ function closeMobileMenuOnTabSelect() {
     }
 }
 
+// Flashcard functionality
+let flashcardData = [];
+let currentFlashcardIndex = 0;
+let isFlashcardFlipped = false;
+
+async function startFlashcards() {
+    const chapterSelect = document.getElementById('flashcard-chapter-select');
+    const languageSelect = document.getElementById('flashcard-language-select');
+    
+    const chapter = chapterSelect.value;
+    const language = languageSelect.value;
+    
+    if (!chapter) {
+        showError('Please select a chapter');
+        return;
+    }
+    
+    try {
+        showLoading();
+        
+        // Get chapter data with verses
+        const chapterData = await apiRequest(`/api/chapters/${chapter}`);
+        
+        // Extract all words from all verses
+        const words = [];
+        for (const verse of chapterData.verses) {
+            if (verse.tokens) {
+                for (const token of verse.tokens) {
+                    // Get translation for this verse
+                    const compareData = await apiRequest(`/api/compare/${chapter}/${verse.number}`);
+                    const translationKey = getTranslationKey(language);
+                    const translation = compareData.translations[translationKey];
+                    
+                    words.push({
+                        arabic: token.text,
+                        location: `${chapter}:${verse.number}`,
+                        position: `Word ${token.number}`,
+                        verseTranslation: translation ? translation.text : 'Translation not available',
+                        verseArabic: verse.text,
+                        tokenNumber: token.number,
+                        verseNumber: verse.number
+                    });
+                }
+            }
+        }
+        
+        // Shuffle the words
+        flashcardData = shuffleArray(words);
+        currentFlashcardIndex = 0;
+        
+        // Update UI
+        updateFlashcardDisplay();
+        showFlashcardSection();
+        updateFlashcardStats(chapter, language);
+        
+        hideLoading();
+        
+    } catch (error) {
+        console.error('Failed to load flashcard data:', error);
+        showError('Failed to load flashcard data');
+        hideLoading();
+    }
+}
+
+function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
+function showFlashcardSection() {
+    document.getElementById('flashcard-section').style.display = 'block';
+    document.getElementById('next-flashcard-btn').style.display = 'inline-block';
+    document.getElementById('shuffle-btn').style.display = 'inline-block';
+    document.getElementById('reset-btn').style.display = 'inline-block';
+}
+
+function updateFlashcardDisplay() {
+    if (flashcardData.length === 0) return;
+    
+    const currentWord = flashcardData[currentFlashcardIndex];
+    
+    // Update Arabic word
+    document.getElementById('flashcard-arabic').textContent = currentWord.arabic;
+    document.getElementById('flashcard-location').textContent = currentWord.location;
+    document.getElementById('flashcard-position').textContent = currentWord.position;
+    
+    // Update translation
+    const languageSelect = document.getElementById('flashcard-language-select');
+    const language = languageSelect.value;
+    const translationEl = document.getElementById('flashcard-translation');
+    const contextEl = document.getElementById('flashcard-context');
+    
+    // For individual word translation, we'll show the verse translation as context
+    translationEl.textContent = 'Verse Translation:';
+    contextEl.textContent = decodeHtmlEntities(currentWord.verseTranslation);
+    
+    // Apply language-specific styling
+    const languageClass = getLanguageClass(language);
+    translationEl.className = `translation-word ${languageClass}`;
+    contextEl.className = `verse-context ${languageClass}`;
+    
+    // Update progress
+    updateFlashcardProgress();
+    
+    // Reset flip state
+    resetFlashcardFlip();
+}
+
+function updateFlashcardProgress() {
+    const counter = document.getElementById('flashcard-counter');
+    const progressBar = document.getElementById('flashcard-progress');
+    
+    counter.textContent = `${currentFlashcardIndex + 1} / ${flashcardData.length}`;
+    
+    const progress = ((currentFlashcardIndex + 1) / flashcardData.length) * 100;
+    progressBar.style.width = `${progress}%`;
+}
+
+function updateFlashcardStats(chapter, language) {
+    const chapterSelect = document.getElementById('flashcard-chapter-select');
+    const selectedOption = chapterSelect.options[chapterSelect.selectedIndex];
+    const chapterName = selectedOption ? selectedOption.textContent : `Chapter ${chapter}`;
+    
+    const languageNames = {
+        'en': 'English',
+        'ms': 'Malay',
+        'zh': 'Chinese',
+        'ta': 'Tamil'
+    };
+    
+    document.getElementById('current-chapter').textContent = chapterName;
+    document.getElementById('total-words').textContent = flashcardData.length;
+    document.getElementById('current-language').textContent = languageNames[language];
+}
+
+function flipFlashcard() {
+    const flashcard = document.getElementById('flashcard');
+    flashcard.classList.toggle('flipped');
+    isFlashcardFlipped = !isFlashcardFlipped;
+}
+
+function resetFlashcardFlip() {
+    const flashcard = document.getElementById('flashcard');
+    flashcard.classList.remove('flipped');
+    isFlashcardFlipped = false;
+}
+
+function nextFlashcard() {
+    if (flashcardData.length === 0) return;
+    
+    currentFlashcardIndex = (currentFlashcardIndex + 1) % flashcardData.length;
+    updateFlashcardDisplay();
+}
+
+function previousFlashcard() {
+    if (flashcardData.length === 0) return;
+    
+    currentFlashcardIndex = currentFlashcardIndex === 0 
+        ? flashcardData.length - 1 
+        : currentFlashcardIndex - 1;
+    updateFlashcardDisplay();
+}
+
+function shuffleFlashcards() {
+    if (flashcardData.length === 0) return;
+    
+    flashcardData = shuffleArray(flashcardData);
+    currentFlashcardIndex = 0;
+    updateFlashcardDisplay();
+}
+
+function resetFlashcards() {
+    currentFlashcardIndex = 0;
+    if (flashcardData.length > 0) {
+        updateFlashcardDisplay();
+    }
+}
+
+// Populate flashcard chapter dropdown
+function populateFlashcardChapterDropdown() {
+    const chapterSelect = document.getElementById('flashcard-chapter-select');
+    if (!chapterSelect) return;
+    
+    chapterSelect.innerHTML = '<option value="">Select a chapter</option>';
+    
+    // Basic chapter list with names
+    const basicChapters = [
+        {number: 1, name: "Al-Fatihah"},
+        {number: 2, name: "Al-Baqarah"},
+        {number: 3, name: "Ali 'Imran"},
+        {number: 18, name: "Al-Kahf"},
+        {number: 36, name: "Ya-Sin"},
+        {number: 67, name: "Al-Mulk"},
+        {number: 112, name: "Al-Ikhlas"}
+    ];
+    
+    // Add all 114 chapters
+    for (let i = 1; i <= 114; i++) {
+        const basicChapter = basicChapters.find(ch => ch.number === i);
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = basicChapter 
+            ? `${i}. ${basicChapter.name}`
+            : `${i}. Chapter ${i}`;
+        chapterSelect.appendChild(option);
+    }
+}
+
 function getTranslationKey(lang) {
     switch(lang) {
         case 'en': return 'en.hilali';
@@ -1284,6 +1503,35 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
             }
         }, 100);
     });
+});
+
+// Keyboard navigation for flashcards
+document.addEventListener('keydown', (e) => {
+    const activeTab = document.querySelector('.tab-content.active');
+    if (activeTab && activeTab.id === 'flashcard' && flashcardData.length > 0) {
+        switch(e.key) {
+            case 'ArrowLeft':
+                e.preventDefault();
+                previousFlashcard();
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                nextFlashcard();
+                break;
+            case ' ':
+            case 'Enter':
+                e.preventDefault();
+                flipFlashcard();
+                break;
+            case 'r':
+            case 'R':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    shuffleFlashcards();
+                }
+                break;
+        }
+    }
 });
 
 // Add loading states to buttons
