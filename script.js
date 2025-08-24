@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Initialize flashcard chapter dropdown
             if (tabId === 'flashcard') {
                 setTimeout(() => {
-                    populateFlashcardChapterDropdown();
+                    initializeFlashcards();
                 }, 100);
             }
             
@@ -1142,6 +1142,31 @@ let flashcardData = [];
 let currentFlashcardIndex = 0;
 let isFlashcardFlipped = false;
 
+// Initialize flashcard system
+function initializeFlashcards() {
+    // Ensure all elements exist
+    const elements = [
+        'flashcard-chapter-select',
+        'flashcard-language-select', 
+        'flashcard-section',
+        'flashcard',
+        'flashcard-arabic',
+        'flashcard-translation',
+        'flashcard-counter',
+        'flashcard-progress'
+    ];
+    
+    for (const elementId of elements) {
+        const element = document.getElementById(elementId);
+        if (!element) {
+            console.warn(`Flashcard element not found: ${elementId}`);
+        }
+    }
+    
+    // Populate chapter dropdown
+    populateFlashcardChapterDropdown();
+}
+
 async function startFlashcards() {
     const chapterSelect = document.getElementById('flashcard-chapter-select');
     const languageSelect = document.getElementById('flashcard-language-select');
@@ -1157,31 +1182,29 @@ async function startFlashcards() {
     try {
         showLoading();
         
-        // Get chapter data with verses
-        const chapterData = await apiRequest(`/api/chapters/${chapter}`);
+        // For now, let's use a simpler approach with just verse data
+        const verseData = await apiRequest(`/api/verses/${chapter}/1`);
         
-        // Extract all words from all verses
-        const words = [];
-        for (const verse of chapterData.verses) {
-            if (verse.tokens) {
-                for (const token of verse.tokens) {
-                    // Get translation for this verse
-                    const compareData = await apiRequest(`/api/compare/${chapter}/${verse.number}`);
-                    const translationKey = getTranslationKey(language);
-                    const translation = compareData.translations[translationKey];
-                    
-                    words.push({
-                        arabic: token.text,
-                        location: `${chapter}:${verse.number}`,
-                        position: `Word ${token.number}`,
-                        verseTranslation: translation ? translation.text : 'Translation not available',
-                        verseArabic: verse.text,
-                        tokenNumber: token.number,
-                        verseNumber: verse.number
-                    });
-                }
-            }
+        if (!verseData || !verseData.tokens) {
+            throw new Error('No token data found');
         }
+        
+        // Get translation for the first verse
+        const compareData = await apiRequest(`/api/compare/${chapter}/1`);
+        const translationKey = getTranslationKey(language);
+        const translation = compareData.translations[translationKey];
+        const translationText = translation ? decodeHtmlEntities(translation.text) : 'Translation not available';
+        
+        // Create flashcards from the first verse tokens
+        const words = verseData.tokens.map(token => ({
+            arabic: token.text,
+            location: `${chapter}:1`,
+            position: `Word ${token.number}`,
+            verseTranslation: translationText,
+            verseArabic: verseData.text,
+            tokenNumber: token.number,
+            verseNumber: 1
+        }));
         
         // Shuffle the words
         flashcardData = shuffleArray(words);
@@ -1196,7 +1219,7 @@ async function startFlashcards() {
         
     } catch (error) {
         console.error('Failed to load flashcard data:', error);
-        showError('Failed to load flashcard data');
+        showError(`Failed to load flashcard data: ${error.message}`);
         hideLoading();
     }
 }
