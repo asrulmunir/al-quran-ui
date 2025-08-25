@@ -30,16 +30,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Close mobile menu when tab is selected
             closeMobileMenuOnTabSelect();
             
-            // Load chapters data when verses, compare, screenshot, or flashcard tab is activated
-            if ((tabId === 'verses' || tabId === 'compare' || tabId === 'screenshot' || tabId === 'flashcard') && chaptersData.length === 0) {
+            // Load chapters data when verses, compare, or screenshot tab is activated
+            if ((tabId === 'verses' || tabId === 'compare' || tabId === 'screenshot') && chaptersData.length === 0) {
                 loadChaptersForDropdown();
-            }
-            
-            // Initialize flashcard chapter dropdown
-            if (tabId === 'flashcard') {
-                setTimeout(() => {
-                    initializeFlashcards();
-                }, 100);
             }
             
             // Ensure screenshot dropdown is populated immediately
@@ -1142,37 +1135,53 @@ let flashcardData = [];
 let currentFlashcardIndex = 0;
 let isFlashcardFlipped = false;
 
+// Simple test function for flashcard debugging
+function testFlashcard() {
+    console.log('Test flashcard function called');
+    
+    const resultDiv = document.getElementById('test-result');
+    const messageDiv = document.getElementById('test-message');
+    const chapterSelect = document.getElementById('flashcard-chapter-select');
+    
+    if (resultDiv && messageDiv && chapterSelect) {
+        resultDiv.style.display = 'block';
+        messageDiv.textContent = `Test successful! Selected chapter: ${chapterSelect.value || 'None'}. Time: ${new Date().toLocaleTimeString()}`;
+        console.log('Test completed successfully');
+    } else {
+        console.error('Test elements not found');
+        alert('Test elements not found - check console');
+    }
+}
+
 // Initialize flashcard system
 function initializeFlashcards() {
-    // Ensure all elements exist
-    const elements = [
-        'flashcard-chapter-select',
-        'flashcard-language-select', 
-        'flashcard-section',
-        'flashcard',
-        'flashcard-arabic',
-        'flashcard-translation',
-        'flashcard-counter',
-        'flashcard-progress'
-    ];
+    console.log('Initializing flashcards...');
     
-    for (const elementId of elements) {
-        const element = document.getElementById(elementId);
-        if (!element) {
-            console.warn(`Flashcard element not found: ${elementId}`);
-        }
+    // Simple test
+    const testDiv = document.getElementById('test-result');
+    if (testDiv) {
+        console.log('Flashcard tab elements found');
+    } else {
+        console.error('Flashcard tab elements not found');
     }
-    
-    // Populate chapter dropdown
-    populateFlashcardChapterDropdown();
 }
 
 async function startFlashcards() {
+    console.log('Starting flashcards...');
+    
     const chapterSelect = document.getElementById('flashcard-chapter-select');
     const languageSelect = document.getElementById('flashcard-language-select');
     
+    if (!chapterSelect || !languageSelect) {
+        console.error('Chapter or language select not found');
+        showError('Flashcard controls not found');
+        return;
+    }
+    
     const chapter = chapterSelect.value;
     const language = languageSelect.value;
+    
+    console.log(`Selected chapter: ${chapter}, language: ${language}`);
     
     if (!chapter) {
         showError('Please select a chapter');
@@ -1180,47 +1189,55 @@ async function startFlashcards() {
     }
     
     try {
-        showLoading();
+        // For testing, use hardcoded data first
+        console.log('Creating test flashcard data...');
         
-        // For now, let's use a simpler approach with just verse data
-        const verseData = await apiRequest(`/api/verses/${chapter}/1`);
+        const testWords = [
+            {
+                arabic: 'بِسْمِ',
+                location: '1:1',
+                position: 'Word 1',
+                verseTranslation: 'In the name of Allah, the Entirely Merciful, the Especially Merciful.',
+                verseArabic: 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ',
+                tokenNumber: 1,
+                verseNumber: 1
+            },
+            {
+                arabic: 'ٱللَّهِ',
+                location: '1:1',
+                position: 'Word 2',
+                verseTranslation: 'In the name of Allah, the Entirely Merciful, the Especially Merciful.',
+                verseArabic: 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ',
+                tokenNumber: 2,
+                verseNumber: 1
+            },
+            {
+                arabic: 'ٱلرَّحْمَٰنِ',
+                location: '1:1',
+                position: 'Word 3',
+                verseTranslation: 'In the name of Allah, the Entirely Merciful, the Especially Merciful.',
+                verseArabic: 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ',
+                tokenNumber: 3,
+                verseNumber: 1
+            }
+        ];
         
-        if (!verseData || !verseData.tokens) {
-            throw new Error('No token data found');
-        }
-        
-        // Get translation for the first verse
-        const compareData = await apiRequest(`/api/compare/${chapter}/1`);
-        const translationKey = getTranslationKey(language);
-        const translation = compareData.translations[translationKey];
-        const translationText = translation ? decodeHtmlEntities(translation.text) : 'Translation not available';
-        
-        // Create flashcards from the first verse tokens
-        const words = verseData.tokens.map(token => ({
-            arabic: token.text,
-            location: `${chapter}:1`,
-            position: `Word ${token.number}`,
-            verseTranslation: translationText,
-            verseArabic: verseData.text,
-            tokenNumber: token.number,
-            verseNumber: 1
-        }));
-        
-        // Shuffle the words
-        flashcardData = shuffleArray(words);
+        // Set flashcard data
+        flashcardData = testWords;
         currentFlashcardIndex = 0;
+        
+        console.log('Test data created, updating display...');
         
         // Update UI
         updateFlashcardDisplay();
         showFlashcardSection();
         updateFlashcardStats(chapter, language);
         
-        hideLoading();
+        console.log('Flashcards started successfully');
         
     } catch (error) {
-        console.error('Failed to load flashcard data:', error);
-        showError(`Failed to load flashcard data: ${error.message}`);
-        hideLoading();
+        console.error('Failed to start flashcards:', error);
+        showError(`Failed to start flashcards: ${error.message}`);
     }
 }
 
@@ -1619,3 +1636,8 @@ function initializeTooltips() {
 
 // Call initialization functions
 document.addEventListener('DOMContentLoaded', initializeTooltips);
+
+// Simple test function for debugging
+function testFlashcard() {
+    alert('Test function works! Flashcard tab is loading correctly.');
+}
