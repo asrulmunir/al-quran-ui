@@ -4,70 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Al-Quran API Showcase</title>
-    <!-- NO EXTERNAL CSS - USING INLINE STYLES ONLY -->
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
-            font-family: Arial, sans-serif; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6; color: #333; 
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
             min-height: 100vh; 
-            color: #333; 
         }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         header { text-align: center; color: white; margin-bottom: 30px; }
         header h1 { font-size: 2.5rem; margin-bottom: 10px; }
         .tab-nav { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 5px; 
-            margin-bottom: 30px; 
-            background: rgba(255,255,255,0.1); 
-            padding: 10px; 
-            border-radius: 15px; 
+            display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 30px; 
+            background: rgba(255,255,255,0.1); padding: 10px; border-radius: 15px; 
         }
         .tab-btn { 
-            flex: 1; 
-            min-width: 120px; 
-            padding: 12px 16px; 
-            border: none; 
-            background: rgba(255,255,255,0.2); 
-            color: white; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-weight: 600; 
+            flex: 1; min-width: 120px; padding: 12px 16px; border: none; 
+            background: rgba(255,255,255,0.2); color: white; border-radius: 8px; 
+            cursor: pointer; font-weight: 600; transition: all 0.3s ease;
         }
+        .tab-btn:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
         .tab-btn.active { background: rgba(255,255,255,0.4); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .section { 
-            background: rgba(255,255,255,0.95); 
-            padding: 30px; 
-            margin-bottom: 20px; 
-            border-radius: 15px; 
+            background: rgba(255,255,255,0.95); padding: 30px; margin-bottom: 20px; 
+            border-radius: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.1);
         }
+        .section h2 { color: #2c3e50; margin-bottom: 15px; font-size: 1.8rem; }
         .btn { 
-            padding: 12px 24px; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-weight: 600; 
-            margin: 5px; 
+            padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; 
+            font-weight: 600; margin: 5px; transition: all 0.3s ease;
         }
-        .btn.primary { background: #667eea; color: white; }
+        .btn.primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn.secondary { background: #6c757d; color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
         .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
-        input, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #2c3e50; }
+        input, select, textarea { 
+            width: 100%; padding: 12px; border: 2px solid #e0e6ed; border-radius: 8px; 
+            font-size: 16px; transition: border-color 0.3s ease;
+        }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #667eea; }
+        .result-container { 
+            margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; 
+            border-left: 4px solid #667eea;
+        }
+        .arabic-text { 
+            font-family: 'Amiri', 'Traditional Arabic', serif; font-size: 1.5rem; 
+            direction: rtl; text-align: right; line-height: 1.8; margin: 15px 0;
+        }
         .mobile-menu-toggle { display: none; }
         @media (max-width: 768px) {
             .tab-nav { flex-direction: column; }
             .mobile-menu-toggle { 
-                display: flex; 
-                flex-direction: column; 
-                width: 30px; 
-                height: 30px; 
-                background: transparent; 
-                border: none; 
-                cursor: pointer; 
+                display: flex; flex-direction: column; width: 30px; height: 30px; 
+                background: transparent; border: none; cursor: pointer; 
             }
             .hamburger-line { width: 25px; height: 3px; background: white; margin: 2px 0; }
             .tab-nav-content { display: none; flex-direction: column; width: 100%; }
@@ -75,13 +68,118 @@
             .tab-btn { width: 100%; text-align: left; min-width: auto; }
         }
         .hidden { display: none !important; }
+        .loading { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); display: flex; justify-content: center; 
+            align-items: center; z-index: 1000;
+        }
+        .spinner { 
+            border: 4px solid #f3f3f3; border-top: 4px solid #667eea; 
+            border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .modal { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); display: flex; justify-content: center; 
+            align-items: center; z-index: 1001;
+        }
+        .modal-content { 
+            background: white; padding: 30px; border-radius: 15px; max-width: 500px; 
+            width: 90%; position: relative;
+        }
+        .close { 
+            position: absolute; top: 15px; right: 20px; font-size: 28px; 
+            font-weight: bold; cursor: pointer; color: #aaa;
+        }
+        .close:hover { color: #000; }
+        
+        /* Enhanced Flashcard Styles */
+        .flashcard-controls { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; 
+            padding: 20px; background: rgba(255,255,255,0.1); border-radius: 12px;
+        }
+        .flashcard-buttons { 
+            grid-column: 1 / -1; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; 
+        }
+        .flashcard { 
+            width: 100%; height: 300px; perspective: 1000px; margin: 20px 0; cursor: pointer; 
+        }
+        .flashcard-inner { 
+            position: relative; width: 100%; height: 100%; text-align: center; 
+            transition: transform 0.6s; transform-style: preserve-3d;
+        }
+        .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+        .flashcard-front, .flashcard-back { 
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden; 
+            border-radius: 15px; display: flex; flex-direction: column; justify-content: center; 
+            align-items: center; padding: 30px; box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .flashcard-front { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; 
+        }
+        .flashcard-back { 
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; 
+            transform: rotateY(180deg);
+        }
+        .arabic-word { 
+            font-family: 'Amiri', 'Traditional Arabic', serif; font-size: 3rem; 
+            font-weight: 700; margin-bottom: 20px; direction: rtl; line-height: 1.2;
+        }
+        .translation-word { font-size: 2rem; font-weight: 600; margin-bottom: 15px; line-height: 1.3; }
+        .word-info { 
+            display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 15px; 
+        }
+        .verse-location, .word-position { 
+            background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; 
+            font-size: 0.9rem; font-weight: 500;
+        }
+        .verse-context { font-size: 1.1rem; opacity: 0.9; line-height: 1.4; max-width: 400px; }
+        .flashcard-navigation { 
+            display: flex; justify-content: center; gap: 15px; margin: 30px 0; flex-wrap: wrap; 
+        }
+        .nav-btn { 
+            padding: 12px 20px; border: none; border-radius: 25px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; 
+            font-weight: 600; cursor: pointer; transition: all 0.3s ease;
+        }
+        .nav-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4); }
+        .flip-btn { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); }
+        .flashcard-stats { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; 
+            margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 12px;
+        }
+        .stat-item { text-align: center; }
+        .stat-label { display: block; font-size: 0.9rem; opacity: 0.8; margin-bottom: 5px; }
+        .stat-value { display: block; font-size: 1.1rem; font-weight: 600; color: #2c3e50; }
+        .progress-bar { 
+            width: 100%; height: 8px; background: rgba(255,255,255,0.3); border-radius: 4px; 
+            overflow: hidden; margin-top: 10px;
+        }
+        .progress-fill { 
+            height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); 
+            border-radius: 4px; transition: width 0.3s ease; width: 0%;
+        }
+        
+        @media (max-width: 768px) {
+            .flashcard-controls { grid-template-columns: 1fr; gap: 15px; padding: 15px; }
+            .flashcard { height: 250px; }
+            .arabic-word { font-size: 2.5rem; }
+            .translation-word { font-size: 1.6rem; }
+            .flashcard-navigation { flex-direction: column; align-items: center; gap: 10px; }
+            .nav-btn { width: 200px; padding: 15px 20px; }
+            .flashcard-stats { grid-template-columns: 1fr; gap: 10px; padding: 15px; }
+        }
     </style>
+    <!-- Arabic font support -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <header>
             <h1>🕌 Al-Quran API Showcase</h1>
-            <p>Complete demonstration of all API functionalities</p>
+            <p>Complete demonstration of all API functionalities with Arabic vocabulary flashcards</p>
         </header>
 
         <nav class="tab-nav">
@@ -100,7 +198,6 @@
                 <button class="tab-btn" data-tab="search-translation">Search Translation</button>
                 <button class="tab-btn" data-tab="translations">Translations</button>
                 <button class="tab-btn" data-tab="stats">Statistics</button>
-                <button class="tab-btn" data-tab="screenshot">Screenshot</button>
                 <button class="tab-btn" data-tab="flashcard">Flashcard</button>
             </div>
         </nav>
@@ -110,47 +207,244 @@
             <div class="tab-content active" id="info">
                 <div class="section">
                     <h2>📊 API Information</h2>
-                    <p>This version uses inline CSS only to ensure loading.</p>
+                    <p>Get basic information about the Al-Quran API including total chapters, verses, and tokens.</p>
                     <button onclick="loadApiInfo()" class="btn primary">Load API Info</button>
                     <div id="api-info-result"></div>
                 </div>
             </div>
 
-            <!-- Flashcard Tab -->
+            <!-- Chapters Tab -->
+            <div class="tab-content" id="chapters">
+                <div class="section">
+                    <h2>📚 Chapters Management</h2>
+                    <p>Browse all 114 chapters or get specific chapter details with verses.</p>
+                    
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0;">
+                        <button onclick="loadAllChapters()" class="btn primary">Load All Chapters</button>
+                        <button onclick="loadPopularChapters()" class="btn secondary">Popular Chapters</button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="specific-chapter">Get Specific Chapter:</label>
+                        <select id="specific-chapter">
+                            <option value="">Select a chapter</option>
+                        </select>
+                        <button onclick="loadSpecificChapter()" class="btn primary" style="margin-top: 10px;">Load Chapter</button>
+                    </div>
+                    
+                    <div id="chapters-result"></div>
+                </div>
+            </div>
+
+            <!-- Verses Tab -->
+            <div class="tab-content" id="verses">
+                <div class="section">
+                    <h2>📝 Verse Lookup</h2>
+                    <p>Get specific verses with detailed information including Arabic text and token breakdown.</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label for="verse-chapter">Chapter:</label>
+                            <select id="verse-chapter">
+                                <option value="">Loading chapters...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="verse-number">Verse Number:</label>
+                            <input type="number" id="verse-number" min="1" placeholder="Enter verse number">
+                        </div>
+                    </div>
+                    
+                    <button onclick="loadVerse()" class="btn primary">Load Verse</button>
+                    
+                    <div style="margin: 20px 0;">
+                        <h3>Quick Access - Famous Verses:</h3>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                            <button onclick="loadFamousVerse(1, 1)" class="btn secondary">Bismillah (1:1)</button>
+                            <button onclick="loadFamousVerse(2, 255)" class="btn secondary">Ayat al-Kursi (2:255)</button>
+                            <button onclick="loadFamousVerse(112, 1)" class="btn secondary">Al-Ikhlas (112:1)</button>
+                        </div>
+                    </div>
+                    
+                    <div id="verses-result"></div>
+                </div>
+            </div>
+
+            <!-- Compare Tab -->
+            <div class="tab-content" id="compare">
+                <div class="section">
+                    <h2>🔄 Translation Comparison</h2>
+                    <p>Compare Arabic text with translations in multiple languages side-by-side.</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label for="compare-chapter">Chapter:</label>
+                            <select id="compare-chapter">
+                                <option value="">Loading chapters...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="compare-verse">Verse Number:</label>
+                            <input type="number" id="compare-verse" min="1" placeholder="Enter verse number">
+                        </div>
+                    </div>
+                    
+                    <button onclick="loadComparison()" class="btn primary">Load Comparison</button>
+                    
+                    <div id="compare-result"></div>
+                </div>
+            </div>
+
+            <!-- Search Arabic Tab -->
+            <div class="tab-content" id="search">
+                <div class="section">
+                    <h2>🔍 Arabic Text Search</h2>
+                    <p>Search for verses containing specific Arabic text with advanced options.</p>
+                    
+                    <div class="form-group">
+                        <label for="arabic-search-text">Arabic Text:</label>
+                        <input type="text" id="arabic-search-text" placeholder="Enter Arabic text" dir="rtl">
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="exact-match"> Exact Match
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="normalize-text" checked> Normalize Text
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="search-limit">Limit Results:</label>
+                            <input type="number" id="search-limit" value="10" min="1" max="50">
+                        </div>
+                    </div>
+                    
+                    <button onclick="searchArabicText()" class="btn primary">Search</button>
+                    
+                    <div style="margin: 20px 0;">
+                        <h3>Quick Search - Common Terms:</h3>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                            <button onclick="quickArabicSearch('الله')" class="btn secondary">الله</button>
+                            <button onclick="quickArabicSearch('رب')" class="btn secondary">رب</button>
+                            <button onclick="quickArabicSearch('رحمن')" class="btn secondary">رحمن</button>
+                            <button onclick="quickArabicSearch('صلاة')" class="btn secondary">صلاة</button>
+                        </div>
+                    </div>
+                    
+                    <div id="search-result"></div>
+                </div>
+            </div>
+
+            <!-- Search Translation Tab -->
+            <div class="tab-content" id="search-translation">
+                <div class="section">
+                    <h2>🌐 Translation Search</h2>
+                    <p>Search for verses by translation text in multiple languages.</p>
+                    
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label for="translation-search-text">Search Text:</label>
+                            <input type="text" id="translation-search-text" placeholder="Enter search term">
+                        </div>
+                        <div class="form-group">
+                            <label for="translation-language">Language:</label>
+                            <select id="translation-language">
+                                <option value="en">English</option>
+                                <option value="ms">Malay</option>
+                                <option value="zh">Chinese</option>
+                                <option value="ta">Tamil</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button onclick="searchTranslation()" class="btn primary">Search Translation</button>
+                    
+                    <div style="margin: 20px 0;">
+                        <h3>Concept Search:</h3>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                            <button onclick="quickTranslationSearch('mercy')" class="btn secondary">Mercy</button>
+                            <button onclick="quickTranslationSearch('forgiveness')" class="btn secondary">Forgiveness</button>
+                            <button onclick="quickTranslationSearch('guidance')" class="btn secondary">Guidance</button>
+                            <button onclick="quickTranslationSearch('prayer')" class="btn secondary">Prayer</button>
+                        </div>
+                    </div>
+                    
+                    <div id="translation-search-result"></div>
+                </div>
+            </div>
+
+            <!-- Translations Tab -->
+            <div class="tab-content" id="translations">
+                <div class="section">
+                    <h2>🌍 Available Translations</h2>
+                    <p>List all available translations with translator information and attribution.</p>
+                    <button onclick="loadTranslations()" class="btn primary">Load Available Translations</button>
+                    <div id="translations-result"></div>
+                </div>
+            </div>
+
+            <!-- Statistics Tab -->
+            <div class="tab-content" id="stats">
+                <div class="section">
+                    <h2>📈 Quran Statistics</h2>
+                    <p>Comprehensive statistics about the Quran including chapter and verse analysis.</p>
+                    <button onclick="loadStatistics()" class="btn primary">Load Statistics</button>
+                    <div id="stats-result"></div>
+                </div>
+            </div>
+
+            <!-- Enhanced Flashcard Tab -->
             <div class="tab-content" id="flashcard">
                 <div class="section">
                     <h2>🎯 Arabic Vocabulary Flashcards</h2>
                     <p>Learn Quranic Arabic vocabulary with interactive flashcards. Select a chapter and translation language to start memorizing words.</p>
                     
-                    <div class="form-group">
-                        <label for="flashcard-chapter-select">Chapter:</label>
-                        <select id="flashcard-chapter-select">
-                            <option value="">Select a chapter</option>
-                            <option value="1">1. Al-Fatihah (The Opening)</option>
-                            <option value="2">2. Al-Baqarah (The Cow)</option>
-                            <option value="3">3. Ali 'Imran (Family of Imran)</option>
-                            <option value="18">18. Al-Kahf (The Cave)</option>
-                            <option value="36">36. Ya-Sin</option>
-                            <option value="67">67. Al-Mulk (The Sovereignty)</option>
-                            <option value="112">112. Al-Ikhlas (The Sincerity)</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="flashcard-language-select">Translation Language:</label>
-                        <select id="flashcard-language-select">
-                            <option value="en">English (Hilali-Khan)</option>
-                            <option value="ms">Malay (Basmeih)</option>
-                            <option value="zh">Chinese (Ma Jian)</option>
-                            <option value="ta">Tamil (Jan Trust)</option>
-                        </select>
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0;">
-                        <button onclick="startFlashcards()" class="btn primary">Start Flashcards</button>
-                        <button onclick="nextFlashcard()" class="btn" id="next-flashcard-btn" style="display: none; background: #28a745; color: white;">Next Word</button>
-                        <button onclick="shuffleFlashcards()" class="btn" id="shuffle-btn" style="display: none; background: #ffc107; color: black;">Shuffle</button>
-                        <button onclick="resetFlashcards()" class="btn" id="reset-btn" style="display: none; background: #6c757d; color: white;">Reset</button>
+                    <div class="flashcard-controls">
+                        <div class="form-group">
+                            <label for="flashcard-chapter-select">Chapter:</label>
+                            <select id="flashcard-chapter-select">
+                                <option value="">Select a chapter</option>
+                                <option value="1">1. Al-Fatihah (The Opening)</option>
+                                <option value="2">2. Al-Baqarah (The Cow)</option>
+                                <option value="3">3. Ali 'Imran (Family of Imran)</option>
+                                <option value="18">18. Al-Kahf (The Cave)</option>
+                                <option value="36">36. Ya-Sin</option>
+                                <option value="67">67. Al-Mulk (The Sovereignty)</option>
+                                <option value="112">112. Al-Ikhlas (The Sincerity)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="flashcard-language-select">Translation Language:</label>
+                            <select id="flashcard-language-select">
+                                <option value="en">English (Hilali-Khan)</option>
+                                <option value="ms">Malay (Basmeih)</option>
+                                <option value="zh">Chinese (Ma Jian)</option>
+                                <option value="ta">Tamil (Jan Trust)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="flashcard-verses-count">Number of Verses:</label>
+                            <select id="flashcard-verses-count">
+                                <option value="1">First verse only</option>
+                                <option value="3">First 3 verses</option>
+                                <option value="5">First 5 verses</option>
+                                <option value="10">First 10 verses</option>
+                                <option value="all">All verses</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flashcard-buttons">
+                            <button onclick="startFlashcards()" class="btn primary">Start Flashcards</button>
+                            <button onclick="nextFlashcard()" class="btn secondary" id="next-flashcard-btn" style="display: none;">Next Word</button>
+                            <button onclick="shuffleFlashcards()" class="btn secondary" id="shuffle-btn" style="display: none;">Shuffle</button>
+                            <button onclick="resetFlashcards()" class="btn secondary" id="reset-btn" style="display: none;">Reset</button>
+                        </div>
                     </div>
                 </div>
 
@@ -159,50 +453,50 @@
                         <!-- Progress -->
                         <div style="margin-bottom: 20px;">
                             <span id="flashcard-counter" style="font-weight: 600; color: #2c3e50;">0 / 0</span>
-                            <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.3); border-radius: 4px; margin-top: 10px; overflow: hidden;">
-                                <div id="flashcard-progress" style="height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 4px; transition: width 0.3s ease; width: 0%;"></div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="flashcard-progress"></div>
                             </div>
                         </div>
                         
                         <!-- Flashcard -->
-                        <div id="flashcard" onclick="flipFlashcard()" style="width: 100%; height: 300px; perspective: 1000px; margin: 20px 0; cursor: pointer;">
-                            <div id="flashcard-inner" style="position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d;">
+                        <div class="flashcard" id="flashcard" onclick="flipFlashcard()">
+                            <div class="flashcard-inner" id="flashcard-inner">
                                 <!-- Front -->
-                                <div id="flashcard-front" style="position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                                    <div id="flashcard-arabic" style="font-family: 'Amiri', 'Traditional Arabic', serif; font-size: 3rem; font-weight: 700; margin-bottom: 20px; direction: rtl; line-height: 1.2;">Click Start</div>
-                                    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 15px;">
-                                        <span id="flashcard-location" style="background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: 500;"></span>
-                                        <span id="flashcard-position" style="background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: 500;"></span>
+                                <div class="flashcard-front">
+                                    <div class="arabic-word" id="flashcard-arabic">Click Start</div>
+                                    <div class="word-info">
+                                        <span class="verse-location" id="flashcard-location"></span>
+                                        <span class="word-position" id="flashcard-position"></span>
                                     </div>
                                 </div>
                                 <!-- Back -->
-                                <div id="flashcard-back" style="position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; transform: rotateY(180deg);">
-                                    <div id="flashcard-translation" style="font-size: 1.5rem; font-weight: 600; margin-bottom: 15px; line-height: 1.3;">Translation</div>
-                                    <div id="flashcard-context" style="font-size: 1.1rem; opacity: 0.9; line-height: 1.4; max-width: 400px; text-align: center;">Context will appear here</div>
+                                <div class="flashcard-back">
+                                    <div class="translation-word" id="flashcard-translation">Translation</div>
+                                    <div class="verse-context" id="flashcard-context">Context will appear here</div>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Navigation -->
-                        <div style="display: flex; justify-content: center; gap: 15px; margin: 30px 0; flex-wrap: wrap;">
-                            <button onclick="previousFlashcard()" id="prev-btn" style="padding: 12px 20px; border: none; border-radius: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; cursor: pointer;">← Previous</button>
-                            <button onclick="flipFlashcard()" style="padding: 12px 20px; border: none; border-radius: 25px; background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: white; font-weight: 600; cursor: pointer;">🔄 Flip</button>
-                            <button onclick="nextFlashcard()" id="next-btn" style="padding: 12px 20px; border: none; border-radius: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; cursor: pointer;">Next →</button>
+                        <div class="flashcard-navigation">
+                            <button onclick="previousFlashcard()" class="nav-btn" id="prev-btn">← Previous</button>
+                            <button onclick="flipFlashcard()" class="nav-btn flip-btn">🔄 Flip</button>
+                            <button onclick="nextFlashcard()" class="nav-btn" id="next-btn">Next →</button>
                         </div>
                         
                         <!-- Statistics -->
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 12px;">
-                            <div style="text-align: center;">
-                                <div style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 5px;">Chapter</div>
-                                <div id="current-chapter" style="font-size: 1.1rem; font-weight: 600; color: #2c3e50;">-</div>
+                        <div class="flashcard-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Chapter</span>
+                                <span class="stat-value" id="current-chapter">-</span>
                             </div>
-                            <div style="text-align: center;">
-                                <div style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 5px;">Total Words</div>
-                                <div id="total-words" style="font-size: 1.1rem; font-weight: 600; color: #2c3e50;">-</div>
+                            <div class="stat-item">
+                                <span class="stat-label">Total Words</span>
+                                <span class="stat-value" id="total-words">-</span>
                             </div>
-                            <div style="text-align: center;">
-                                <div style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 5px;">Language</div>
-                                <div id="current-language" style="font-size: 1.1rem; font-weight: 600; color: #2c3e50;">-</div>
+                            <div class="stat-item">
+                                <span class="stat-label">Language</span>
+                                <span class="stat-value" id="current-language">-</span>
                             </div>
                         </div>
                         
@@ -213,335 +507,26 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Other tabs placeholder -->
-            <div class="tab-content" id="chapters">
-                <div class="section">
-                    <h2>📚 Chapters</h2>
-                    <p>Chapter functionality will be restored once flashcard issue is resolved.</p>
-                </div>
-            </div>
-
-            <div class="tab-content" id="verses">
-                <div class="section">
-                    <h2>📝 Verses</h2>
-                    <p>Verse functionality will be restored once flashcard issue is resolved.</p>
-                </div>
-            </div>
-
-            <div class="tab-content" id="compare">
-                <div class="section">
-                    <h2>🔄 Compare</h2>
-                    <p>Compare functionality will be restored once flashcard issue is resolved.</p>
-                </div>
-            </div>
-
-            <div class="tab-content" id="search">
-                <div class="section">
-                    <h2>🔍 Search Arabic</h2>
-                    <p>Search functionality will be restored once flashcard issue is resolved.</p>
-                </div>
-            </div>
-
-            <div class="tab-content" id="search-translation">
-                <div class="section">
-                    <h2>🌐 Search Translation</h2>
-                    <p>Translation search will be restored once flashcard issue is resolved.</p>
-                </div>
-            </div>
-
-            <div class="tab-content" id="translations">
-                <div class="section">
-                    <h2>📖 Translations</h2>
-                    <p>Translations functionality will be restored once flashcard issue is resolved.</p>
-                </div>
-            </div>
-
-            <div class="tab-content" id="stats">
-                <div class="section">
-                    <h2>📈 Statistics</h2>
-                    <p>Statistics functionality will be restored once flashcard issue is resolved.</p>
-                </div>
-            </div>
-
-            <div class="tab-content" id="screenshot">
-                <div class="section">
-                    <h2>📸 Screenshot</h2>
-                    <p>Screenshot functionality will be restored once flashcard issue is resolved.</p>
-                </div>
-            </div>
         </main>
     </div>
 
-    <script>
-        // Basic tab functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const tabBtns = document.querySelectorAll('.tab-btn');
-            const tabContents = document.querySelectorAll('.tab-content');
+    <!-- Loading and Error Modals -->
+    <div id="loading" class="loading hidden">
+        <div>
+            <div class="spinner"></div>
+            <p style="color: white; margin-top: 20px;">Loading...</p>
+        </div>
+    </div>
 
-            tabBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const tabId = btn.getAttribute('data-tab');
-                    
-                    // Remove active class from all tabs and contents
-                    tabBtns.forEach(b => b.classList.remove('active'));
-                    tabContents.forEach(c => c.classList.remove('active'));
-                    
-                    // Add active class to clicked tab and corresponding content
-                    btn.classList.add('active');
-                    document.getElementById(tabId).classList.add('active');
-                });
-            });
-        });
+    <div id="error-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" onclick="closeErrorModal()">&times;</span>
+            <h3>Error</h3>
+            <p id="error-message"></p>
+        </div>
+    </div>
 
-        // Mobile menu toggle
-        function toggleMobileMenu() {
-            const menuToggle = document.querySelector('.mobile-menu-toggle');
-            const navContent = document.querySelector('.tab-nav-content');
-            
-            if (menuToggle && navContent) {
-                navContent.classList.toggle('show');
-            }
-        }
-
-        // Flashcard functionality
-        let flashcardData = [];
-        let currentFlashcardIndex = 0;
-        let isFlashcardFlipped = false;
-
-        // API request function
-        async function apiRequest(endpoint) {
-            const response = await fetch(`https://quran-api.asrulmunir.workers.dev${endpoint}`);
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            return await response.json();
-        }
-
-        // Get translation key for language
-        function getTranslationKey(language) {
-            const keys = {
-                'en': 'english',
-                'ms': 'malay', 
-                'zh': 'chinese',
-                'ta': 'tamil'
-            };
-            return keys[language] || 'english';
-        }
-
-        // Decode HTML entities
-        function decodeHtmlEntities(text) {
-            const textarea = document.createElement('textarea');
-            textarea.innerHTML = text;
-            return textarea.value;
-        }
-
-        // Shuffle array
-        function shuffleArray(array) {
-            const shuffled = [...array];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
-            return shuffled;
-        }
-
-        // Start flashcards
-        async function startFlashcards() {
-            const chapterSelect = document.getElementById('flashcard-chapter-select');
-            const languageSelect = document.getElementById('flashcard-language-select');
-            
-            const chapter = chapterSelect.value;
-            const language = languageSelect.value;
-            
-            if (!chapter) {
-                alert('Please select a chapter');
-                return;
-            }
-            
-            try {
-                // Show loading
-                document.getElementById('flashcard-arabic').textContent = 'Loading...';
-                
-                // Get first verse data (for performance)
-                const verseData = await apiRequest(`/api/verses/${chapter}/1`);
-                
-                if (!verseData || !verseData.tokens) {
-                    throw new Error('No token data found');
-                }
-                
-                // Get translation for the verse
-                const compareData = await apiRequest(`/api/compare/${chapter}/1`);
-                const translationKey = getTranslationKey(language);
-                const translation = compareData.translations[translationKey];
-                const translationText = translation ? decodeHtmlEntities(translation.text) : 'Translation not available';
-                
-                // Create flashcards from tokens
-                const words = verseData.tokens.map(token => ({
-                    arabic: token.text,
-                    location: `${chapter}:1`,
-                    position: `Word ${token.number}`,
-                    verseTranslation: translationText,
-                    verseArabic: verseData.text,
-                    tokenNumber: token.number,
-                    verseNumber: 1
-                }));
-                
-                // Shuffle the words
-                flashcardData = shuffleArray(words);
-                currentFlashcardIndex = 0;
-                
-                // Update UI
-                updateFlashcardDisplay();
-                showFlashcardSection();
-                updateFlashcardStats(chapter, language);
-                
-            } catch (error) {
-                console.error('Failed to load flashcard data:', error);
-                alert(`Failed to load flashcard data: ${error.message}`);
-                document.getElementById('flashcard-arabic').textContent = 'Click Start';
-            }
-        }
-
-        // Show flashcard section
-        function showFlashcardSection() {
-            document.getElementById('flashcard-section').style.display = 'block';
-            document.getElementById('next-flashcard-btn').style.display = 'inline-block';
-            document.getElementById('shuffle-btn').style.display = 'inline-block';
-            document.getElementById('reset-btn').style.display = 'inline-block';
-        }
-
-        // Update flashcard display
-        function updateFlashcardDisplay() {
-            if (flashcardData.length === 0) return;
-            
-            const currentWord = flashcardData[currentFlashcardIndex];
-            
-            // Update Arabic word
-            document.getElementById('flashcard-arabic').textContent = currentWord.arabic;
-            document.getElementById('flashcard-location').textContent = currentWord.location;
-            document.getElementById('flashcard-position').textContent = currentWord.position;
-            
-            // Update translation
-            document.getElementById('flashcard-translation').textContent = 'Verse Translation:';
-            document.getElementById('flashcard-context').textContent = currentWord.verseTranslation;
-            
-            // Update progress
-            updateFlashcardProgress();
-            
-            // Reset flip state
-            resetFlashcardFlip();
-        }
-
-        // Update progress
-        function updateFlashcardProgress() {
-            const counter = document.getElementById('flashcard-counter');
-            const progressBar = document.getElementById('flashcard-progress');
-            
-            counter.textContent = `${currentFlashcardIndex + 1} / ${flashcardData.length}`;
-            
-            const progress = ((currentFlashcardIndex + 1) / flashcardData.length) * 100;
-            progressBar.style.width = `${progress}%`;
-        }
-
-        // Update stats
-        function updateFlashcardStats(chapter, language) {
-            const chapterSelect = document.getElementById('flashcard-chapter-select');
-            const selectedOption = chapterSelect.options[chapterSelect.selectedIndex];
-            const chapterName = selectedOption ? selectedOption.textContent : `Chapter ${chapter}`;
-            
-            const languageNames = {
-                'en': 'English',
-                'ms': 'Malay',
-                'zh': 'Chinese',
-                'ta': 'Tamil'
-            };
-            
-            document.getElementById('current-chapter').textContent = chapterName;
-            document.getElementById('total-words').textContent = flashcardData.length;
-            document.getElementById('current-language').textContent = languageNames[language];
-        }
-
-        // Flip flashcard
-        function flipFlashcard() {
-            const flashcardInner = document.getElementById('flashcard-inner');
-            if (isFlashcardFlipped) {
-                flashcardInner.style.transform = 'rotateY(0deg)';
-            } else {
-                flashcardInner.style.transform = 'rotateY(180deg)';
-            }
-            isFlashcardFlipped = !isFlashcardFlipped;
-        }
-
-        // Reset flip
-        function resetFlashcardFlip() {
-            const flashcardInner = document.getElementById('flashcard-inner');
-            flashcardInner.style.transform = 'rotateY(0deg)';
-            isFlashcardFlipped = false;
-        }
-
-        // Navigation functions
-        function nextFlashcard() {
-            if (flashcardData.length === 0) return;
-            currentFlashcardIndex = (currentFlashcardIndex + 1) % flashcardData.length;
-            updateFlashcardDisplay();
-        }
-
-        function previousFlashcard() {
-            if (flashcardData.length === 0) return;
-            currentFlashcardIndex = currentFlashcardIndex === 0 
-                ? flashcardData.length - 1 
-                : currentFlashcardIndex - 1;
-            updateFlashcardDisplay();
-        }
-
-        function shuffleFlashcards() {
-            if (flashcardData.length === 0) return;
-            flashcardData = shuffleArray(flashcardData);
-            currentFlashcardIndex = 0;
-            updateFlashcardDisplay();
-        }
-
-        function resetFlashcards() {
-            currentFlashcardIndex = 0;
-            if (flashcardData.length > 0) {
-                updateFlashcardDisplay();
-            }
-        }
-
-        // Keyboard navigation
-        document.addEventListener('keydown', (e) => {
-            const activeTab = document.querySelector('.tab-content.active');
-            if (activeTab && activeTab.id === 'flashcard' && flashcardData.length > 0) {
-                switch(e.key) {
-                    case 'ArrowLeft':
-                        e.preventDefault();
-                        previousFlashcard();
-                        break;
-                    case 'ArrowRight':
-                        e.preventDefault();
-                        nextFlashcard();
-                        break;
-                    case ' ':
-                    case 'Enter':
-                        e.preventDefault();
-                        flipFlashcard();
-                        break;
-                    case 'r':
-                    case 'R':
-                        if (e.ctrlKey || e.metaKey) {
-                            e.preventDefault();
-                            shuffleFlashcards();
-                        }
-                        break;
-                }
-            }
-        });
-
-        // Placeholder API function
-        function loadApiInfo() {
-            alert('API Info function works! All JavaScript is loading correctly.');
-        }
-    </script>
+    <!-- External JavaScript -->
+    <script src="script.js"></script>
 </body>
 </html>

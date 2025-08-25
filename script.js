@@ -1130,6 +1130,301 @@ function closeMobileMenuOnTabSelect() {
     }
 }
 
+// Enhanced Flashcard functionality
+let flashcardData = [];
+let currentFlashcardIndex = 0;
+let isFlashcardFlipped = false;
+
+// Mobile menu toggle
+function toggleMobileMenu() {
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    const navContent = document.querySelector('.tab-nav-content');
+    
+    if (menuToggle && navContent) {
+        menuToggle.classList.toggle('show');
+        navContent.classList.toggle('show');
+    }
+}
+
+// Enhanced startFlashcards with multiple verses support
+async function startFlashcards() {
+    const chapterSelect = document.getElementById('flashcard-chapter-select');
+    const languageSelect = document.getElementById('flashcard-language-select');
+    const versesCountSelect = document.getElementById('flashcard-verses-count');
+    
+    const chapter = chapterSelect.value;
+    const language = languageSelect.value;
+    const versesCount = versesCountSelect.value;
+    
+    if (!chapter) {
+        alert('Please select a chapter');
+        return;
+    }
+    
+    try {
+        showLoading();
+        document.getElementById('flashcard-arabic').textContent = 'Loading...';
+        
+        console.log('Loading flashcards for chapter ' + chapter + ', language ' + language + ', verses ' + versesCount);
+        
+        // Get chapter data to determine verse count
+        const chapterData = await apiRequest('/api/chapters/' + chapter);
+        const maxVerses = chapterData.verses ? chapterData.verses.length : 10;
+        
+        let versesToLoad = 1;
+        if (versesCount === 'all') {
+            versesToLoad = Math.min(maxVerses, 20); // Limit to 20 for performance
+        } else if (versesCount !== '1') {
+            versesToLoad = Math.min(parseInt(versesCount), maxVerses);
+        }
+        
+        console.log('Loading ' + versesToLoad + ' verses');
+        
+        const words = [];
+        
+        // Load multiple verses
+        for (let verseNum = 1; verseNum <= versesToLoad; verseNum++) {
+            try {
+                // Get verse data
+                const verseData = await apiRequest('/api/verses/' + chapter + '/' + verseNum);
+                
+                if (verseData && verseData.tokens) {
+                    // Get translation for this verse
+                    const compareData = await apiRequest('/api/compare/' + chapter + '/' + verseNum);
+                    
+                    let translationText = 'Translation not available';
+                    
+                    if (compareData && compareData.translations) {
+                        const possibleKeys = {
+                            'en': ['english', 'en', 'hilali_khan', 'hilali-khan'],
+                            'ms': ['malay', 'ms', 'basmeih'],
+                            'zh': ['chinese', 'zh', 'ma_jian', 'ma-jian'],
+                            'ta': ['tamil', 'ta', 'jan_trust', 'jan-trust']
+                        };
+                        
+                        const keysToTry = possibleKeys[language] || ['english'];
+                        let translation = null;
+                        
+                        for (const key of keysToTry) {
+                            if (compareData.translations[key]) {
+                                translation = compareData.translations[key];
+                                break;
+                            }
+                        }
+                        
+                        if (!translation) {
+                            const availableKeys = Object.keys(compareData.translations);
+                            if (availableKeys.length > 0) {
+                                translation = compareData.translations[availableKeys[0]];
+                            }
+                        }
+                        
+                        if (translation && translation.text) {
+                            translationText = decodeHtmlEntities(translation.text);
+                        }
+                    }
+                    
+                    // Add each token as a flashcard
+                    verseData.tokens.forEach(token => {
+                        words.push({
+                            arabic: token.text,
+                            location: chapter + ':' + verseNum,
+                            position: 'Word ' + token.number,
+                            verseTranslation: translationText,
+                            verseArabic: verseData.text,
+                            tokenNumber: token.number,
+                            verseNumber: verseNum
+                        });
+                    });
+                }
+            } catch (verseError) {
+                console.warn('Failed to load verse ' + verseNum + ':', verseError);
+            }
+        }
+        
+        if (words.length === 0) {
+            throw new Error('No words found in the selected chapter');
+        }
+        
+        console.log('Created ' + words.length + ' flashcards from ' + versesToLoad + ' verses');
+        
+        // Shuffle the words
+        flashcardData = shuffleArray(words);
+        currentFlashcardIndex = 0;
+        
+        // Update UI
+        updateFlashcardDisplay();
+        showFlashcardSection();
+        updateFlashcardStats(chapter, language);
+        
+        hideLoading();
+        
+    } catch (error) {
+        console.error('Failed to load flashcard data:', error);
+        alert('Failed to load flashcard data: ' + error.message);
+        document.getElementById('flashcard-arabic').textContent = 'Click Start';
+        hideLoading();
+    }
+}
+
+// Utility functions for flashcards
+function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
+function decodeHtmlEntities(text) {
+    if (!text || text === 'undefined' || text === 'null') {
+        return 'Translation not available';
+    }
+    try {
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = text;
+        return textarea.value || 'Translation not available';
+    } catch (error) {
+        console.error('Error decoding HTML entities:', error);
+        return 'Translation not available';
+    }
+}
+
+function showFlashcardSection() {
+    document.getElementById('flashcard-section').style.display = 'block';
+    document.getElementById('next-flashcard-btn').style.display = 'inline-block';
+    document.getElementById('shuffle-btn').style.display = 'inline-block';
+    document.getElementById('reset-btn').style.display = 'inline-block';
+}
+
+function updateFlashcardDisplay() {
+    if (flashcardData.length === 0) return;
+    
+    const currentWord = flashcardData[currentFlashcardIndex];
+    
+    // Update Arabic word
+    document.getElementById('flashcard-arabic').textContent = currentWord.arabic;
+    document.getElementById('flashcard-location').textContent = currentWord.location;
+    document.getElementById('flashcard-position').textContent = currentWord.position;
+    
+    // Update translation
+    document.getElementById('flashcard-translation').textContent = 'Verse Translation:';
+    document.getElementById('flashcard-context').textContent = currentWord.verseTranslation;
+    
+    // Update progress
+    updateFlashcardProgress();
+    
+    // Reset flip state
+    resetFlashcardFlip();
+}
+
+function updateFlashcardProgress() {
+    const counter = document.getElementById('flashcard-counter');
+    const progressBar = document.getElementById('flashcard-progress');
+    
+    counter.textContent = (currentFlashcardIndex + 1) + ' / ' + flashcardData.length;
+    
+    const progress = ((currentFlashcardIndex + 1) / flashcardData.length) * 100;
+    progressBar.style.width = progress + '%';
+}
+
+function updateFlashcardStats(chapter, language) {
+    const chapterSelect = document.getElementById('flashcard-chapter-select');
+    const selectedOption = chapterSelect.options[chapterSelect.selectedIndex];
+    const chapterName = selectedOption ? selectedOption.textContent : 'Chapter ' + chapter;
+    
+    const languageNames = {
+        'en': 'English',
+        'ms': 'Malay',
+        'zh': 'Chinese',
+        'ta': 'Tamil'
+    };
+    
+    document.getElementById('current-chapter').textContent = chapterName;
+    document.getElementById('total-words').textContent = flashcardData.length;
+    document.getElementById('current-language').textContent = languageNames[language];
+}
+
+function flipFlashcard() {
+    const flashcard = document.getElementById('flashcard');
+    const flashcardInner = document.getElementById('flashcard-inner');
+    
+    if (isFlashcardFlipped) {
+        flashcard.classList.remove('flipped');
+        flashcardInner.style.transform = 'rotateY(0deg)';
+    } else {
+        flashcard.classList.add('flipped');
+        flashcardInner.style.transform = 'rotateY(180deg)';
+    }
+    isFlashcardFlipped = !isFlashcardFlipped;
+}
+
+function resetFlashcardFlip() {
+    const flashcard = document.getElementById('flashcard');
+    const flashcardInner = document.getElementById('flashcard-inner');
+    flashcard.classList.remove('flipped');
+    flashcardInner.style.transform = 'rotateY(0deg)';
+    isFlashcardFlipped = false;
+}
+
+function nextFlashcard() {
+    if (flashcardData.length === 0) return;
+    currentFlashcardIndex = (currentFlashcardIndex + 1) % flashcardData.length;
+    updateFlashcardDisplay();
+}
+
+function previousFlashcard() {
+    if (flashcardData.length === 0) return;
+    currentFlashcardIndex = currentFlashcardIndex === 0 
+        ? flashcardData.length - 1 
+        : currentFlashcardIndex - 1;
+    updateFlashcardDisplay();
+}
+
+function shuffleFlashcards() {
+    if (flashcardData.length === 0) return;
+    flashcardData = shuffleArray(flashcardData);
+    currentFlashcardIndex = 0;
+    updateFlashcardDisplay();
+}
+
+function resetFlashcards() {
+    currentFlashcardIndex = 0;
+    if (flashcardData.length > 0) {
+        updateFlashcardDisplay();
+    }
+}
+
+// Keyboard navigation for flashcards
+document.addEventListener('keydown', (e) => {
+    const activeTab = document.querySelector('.tab-content.active');
+    if (activeTab && activeTab.id === 'flashcard' && flashcardData.length > 0) {
+        switch(e.key) {
+            case 'ArrowLeft':
+                e.preventDefault();
+                previousFlashcard();
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                nextFlashcard();
+                break;
+            case ' ':
+            case 'Enter':
+                e.preventDefault();
+                flipFlashcard();
+                break;
+            case 'r':
+            case 'R':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    shuffleFlashcards();
+                }
+                break;
+        }
+    }
+});
+
 // Flashcard functionality
 let flashcardData = [];
 let currentFlashcardIndex = 0;
