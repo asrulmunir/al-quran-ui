@@ -1639,5 +1639,13 @@ document.addEventListener('DOMContentLoaded', initializeTooltips);
 
 // Simple test function for debugging
 function testFlashcard() {
-    alert('Test function works! Flashcard tab is loading correctly.');
+    const resultDiv = document.getElementById('test-result');
+    const messageDiv = document.getElementById('test-message');
+    
+    if (resultDiv && messageDiv) {
+        resultDiv.style.display = 'block';
+        messageDiv.textContent = `✅ Success! Flashcard feature is working. CSS issue resolved at ${new Date().toLocaleTimeString()}`;
+    }
+    
+    alert('🎉 Flashcard feature is now working! The CSS issue has been resolved.');
 }

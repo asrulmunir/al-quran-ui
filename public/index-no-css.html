@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Al-Quran API Showcase - No CSS Test</title>
+    <!-- CSS REMOVED FOR TESTING -->
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .tab-btn { padding: 10px 15px; margin: 5px; background: #007cba; color: white; border: none; cursor: pointer; }
+        .tab-content { display: none; padding: 20px; background: white; margin: 10px 0; }
+        .tab-content.active { display: block; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🕌 Al-Quran API Showcase - CSS Test</h1>
+            <p>Testing without external CSS file</p>
+        </header>
+
+        <nav>
+            <button class="tab-btn active" data-tab="info">API Info</button>
+            <button class="tab-btn" data-tab="flashcard">Flashcard</button>
+        </nav>
+
+        <main>
+            <!-- API Info Tab -->
+            <div class="tab-content active" id="info">
+                <div class="section">
+                    <h2>📊 API Information</h2>
+                    <p>This is a test version without external CSS.</p>
+                    <p style="color: green; font-weight: bold;">If you can see this, the HTML structure works!</p>
+                </div>
+            </div>
+
+            <!-- Flashcard Tab -->
+            <div class="tab-content" id="flashcard">
+                <div class="section">
+                    <h2 style="color: red;">🎯 Flashcard Test (No CSS)</h2>
+                    <p style="font-size: 18px;">This flashcard tab should work without external CSS.</p>
+                    
+                    <div style="background: #f0f0f0; padding: 20px; border: 2px solid #007cba; margin: 20px 0;">
+                        <h3>Basic Test</h3>
+                        <p>If you can see this, the flashcard tab works!</p>
+                        <button onclick="alert('Flashcard test successful!')" style="padding: 15px; background: #28a745; color: white; border: none;">Test Flashcard</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Simple tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.getAttribute('data-tab');
+                
+                // Hide all tabs
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                
+                // Show selected tab
+                document.getElementById(tabId).classList.add('active');
+                btn.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
