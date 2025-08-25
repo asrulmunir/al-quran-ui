@@ -120,33 +120,96 @@
             <div class="tab-content" id="flashcard">
                 <div class="section">
                     <h2>🎯 Arabic Vocabulary Flashcards</h2>
-                    <p>Learn Quranic Arabic vocabulary with interactive flashcards.</p>
+                    <p>Learn Quranic Arabic vocabulary with interactive flashcards. Select a chapter and translation language to start memorizing words.</p>
                     
                     <div class="form-group">
                         <label for="flashcard-chapter-select">Chapter:</label>
                         <select id="flashcard-chapter-select">
                             <option value="">Select a chapter</option>
-                            <option value="1">1. Al-Fatihah</option>
-                            <option value="2">2. Al-Baqarah</option>
-                            <option value="112">112. Al-Ikhlas</option>
+                            <option value="1">1. Al-Fatihah (The Opening)</option>
+                            <option value="2">2. Al-Baqarah (The Cow)</option>
+                            <option value="3">3. Ali 'Imran (Family of Imran)</option>
+                            <option value="18">18. Al-Kahf (The Cave)</option>
+                            <option value="36">36. Ya-Sin</option>
+                            <option value="67">67. Al-Mulk (The Sovereignty)</option>
+                            <option value="112">112. Al-Ikhlas (The Sincerity)</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
                         <label for="flashcard-language-select">Translation Language:</label>
                         <select id="flashcard-language-select">
-                            <option value="en">English</option>
-                            <option value="ms">Malay</option>
-                            <option value="zh">Chinese</option>
-                            <option value="ta">Tamil</option>
+                            <option value="en">English (Hilali-Khan)</option>
+                            <option value="ms">Malay (Basmeih)</option>
+                            <option value="zh">Chinese (Ma Jian)</option>
+                            <option value="ta">Tamil (Jan Trust)</option>
                         </select>
                     </div>
                     
-                    <button onclick="testFlashcard()" class="btn primary">Test Flashcards</button>
-                    
-                    <div id="test-result" style="margin-top: 20px; padding: 15px; background: #d4edda; border-radius: 8px; display: none;">
-                        <h4>✅ Flashcard Feature Working!</h4>
-                        <p id="test-message">Ready to implement full flashcard functionality.</p>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0;">
+                        <button onclick="startFlashcards()" class="btn primary">Start Flashcards</button>
+                        <button onclick="nextFlashcard()" class="btn" id="next-flashcard-btn" style="display: none; background: #28a745; color: white;">Next Word</button>
+                        <button onclick="shuffleFlashcards()" class="btn" id="shuffle-btn" style="display: none; background: #ffc107; color: black;">Shuffle</button>
+                        <button onclick="resetFlashcards()" class="btn" id="reset-btn" style="display: none; background: #6c757d; color: white;">Reset</button>
+                    </div>
+                </div>
+
+                <div class="section" id="flashcard-section" style="display: none;">
+                    <div style="max-width: 600px; margin: 0 auto; text-align: center;">
+                        <!-- Progress -->
+                        <div style="margin-bottom: 20px;">
+                            <span id="flashcard-counter" style="font-weight: 600; color: #2c3e50;">0 / 0</span>
+                            <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.3); border-radius: 4px; margin-top: 10px; overflow: hidden;">
+                                <div id="flashcard-progress" style="height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 4px; transition: width 0.3s ease; width: 0%;"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Flashcard -->
+                        <div id="flashcard" onclick="flipFlashcard()" style="width: 100%; height: 300px; perspective: 1000px; margin: 20px 0; cursor: pointer;">
+                            <div id="flashcard-inner" style="position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d;">
+                                <!-- Front -->
+                                <div id="flashcard-front" style="position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                    <div id="flashcard-arabic" style="font-family: 'Amiri', 'Traditional Arabic', serif; font-size: 3rem; font-weight: 700; margin-bottom: 20px; direction: rtl; line-height: 1.2;">Click Start</div>
+                                    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 15px;">
+                                        <span id="flashcard-location" style="background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: 500;"></span>
+                                        <span id="flashcard-position" style="background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: 500;"></span>
+                                    </div>
+                                </div>
+                                <!-- Back -->
+                                <div id="flashcard-back" style="position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; transform: rotateY(180deg);">
+                                    <div id="flashcard-translation" style="font-size: 1.5rem; font-weight: 600; margin-bottom: 15px; line-height: 1.3;">Translation</div>
+                                    <div id="flashcard-context" style="font-size: 1.1rem; opacity: 0.9; line-height: 1.4; max-width: 400px; text-align: center;">Context will appear here</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Navigation -->
+                        <div style="display: flex; justify-content: center; gap: 15px; margin: 30px 0; flex-wrap: wrap;">
+                            <button onclick="previousFlashcard()" id="prev-btn" style="padding: 12px 20px; border: none; border-radius: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; cursor: pointer;">← Previous</button>
+                            <button onclick="flipFlashcard()" style="padding: 12px 20px; border: none; border-radius: 25px; background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: white; font-weight: 600; cursor: pointer;">🔄 Flip</button>
+                            <button onclick="nextFlashcard()" id="next-btn" style="padding: 12px 20px; border: none; border-radius: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; cursor: pointer;">Next →</button>
+                        </div>
+                        
+                        <!-- Statistics -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 12px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 5px;">Chapter</div>
+                                <div id="current-chapter" style="font-size: 1.1rem; font-weight: 600; color: #2c3e50;">-</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 5px;">Total Words</div>
+                                <div id="total-words" style="font-size: 1.1rem; font-weight: 600; color: #2c3e50;">-</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 5px;">Language</div>
+                                <div id="current-language" style="font-size: 1.1rem; font-weight: 600; color: #2c3e50;">-</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Instructions -->
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.9rem; opacity: 0.8;">
+                            <strong>💡 Instructions:</strong> Click the card or use Space/Enter to flip • Use ← → arrow keys to navigate • Ctrl+R to shuffle
+                        </div>
                     </div>
                 </div>
             </div>
@@ -241,18 +304,239 @@
             }
         }
 
-        // Test function
-        function testFlashcard() {
-            const resultDiv = document.getElementById('test-result');
-            const messageDiv = document.getElementById('test-message');
+        // Flashcard functionality
+        let flashcardData = [];
+        let currentFlashcardIndex = 0;
+        let isFlashcardFlipped = false;
+
+        // API request function
+        async function apiRequest(endpoint) {
+            const response = await fetch(`https://quran-api.asrulmunir.workers.dev${endpoint}`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return await response.json();
+        }
+
+        // Get translation key for language
+        function getTranslationKey(language) {
+            const keys = {
+                'en': 'english',
+                'ms': 'malay', 
+                'zh': 'chinese',
+                'ta': 'tamil'
+            };
+            return keys[language] || 'english';
+        }
+
+        // Decode HTML entities
+        function decodeHtmlEntities(text) {
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = text;
+            return textarea.value;
+        }
+
+        // Shuffle array
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Start flashcards
+        async function startFlashcards() {
+            const chapterSelect = document.getElementById('flashcard-chapter-select');
+            const languageSelect = document.getElementById('flashcard-language-select');
             
-            if (resultDiv && messageDiv) {
-                resultDiv.style.display = 'block';
-                messageDiv.textContent = `✅ Success! Flashcard page loads correctly. Time: ${new Date().toLocaleTimeString()}`;
+            const chapter = chapterSelect.value;
+            const language = languageSelect.value;
+            
+            if (!chapter) {
+                alert('Please select a chapter');
+                return;
             }
             
-            alert('🎉 Flashcard feature is working! Page loads successfully with inline CSS.');
+            try {
+                // Show loading
+                document.getElementById('flashcard-arabic').textContent = 'Loading...';
+                
+                // Get first verse data (for performance)
+                const verseData = await apiRequest(`/api/verses/${chapter}/1`);
+                
+                if (!verseData || !verseData.tokens) {
+                    throw new Error('No token data found');
+                }
+                
+                // Get translation for the verse
+                const compareData = await apiRequest(`/api/compare/${chapter}/1`);
+                const translationKey = getTranslationKey(language);
+                const translation = compareData.translations[translationKey];
+                const translationText = translation ? decodeHtmlEntities(translation.text) : 'Translation not available';
+                
+                // Create flashcards from tokens
+                const words = verseData.tokens.map(token => ({
+                    arabic: token.text,
+                    location: `${chapter}:1`,
+                    position: `Word ${token.number}`,
+                    verseTranslation: translationText,
+                    verseArabic: verseData.text,
+                    tokenNumber: token.number,
+                    verseNumber: 1
+                }));
+                
+                // Shuffle the words
+                flashcardData = shuffleArray(words);
+                currentFlashcardIndex = 0;
+                
+                // Update UI
+                updateFlashcardDisplay();
+                showFlashcardSection();
+                updateFlashcardStats(chapter, language);
+                
+            } catch (error) {
+                console.error('Failed to load flashcard data:', error);
+                alert(`Failed to load flashcard data: ${error.message}`);
+                document.getElementById('flashcard-arabic').textContent = 'Click Start';
+            }
         }
+
+        // Show flashcard section
+        function showFlashcardSection() {
+            document.getElementById('flashcard-section').style.display = 'block';
+            document.getElementById('next-flashcard-btn').style.display = 'inline-block';
+            document.getElementById('shuffle-btn').style.display = 'inline-block';
+            document.getElementById('reset-btn').style.display = 'inline-block';
+        }
+
+        // Update flashcard display
+        function updateFlashcardDisplay() {
+            if (flashcardData.length === 0) return;
+            
+            const currentWord = flashcardData[currentFlashcardIndex];
+            
+            // Update Arabic word
+            document.getElementById('flashcard-arabic').textContent = currentWord.arabic;
+            document.getElementById('flashcard-location').textContent = currentWord.location;
+            document.getElementById('flashcard-position').textContent = currentWord.position;
+            
+            // Update translation
+            document.getElementById('flashcard-translation').textContent = 'Verse Translation:';
+            document.getElementById('flashcard-context').textContent = currentWord.verseTranslation;
+            
+            // Update progress
+            updateFlashcardProgress();
+            
+            // Reset flip state
+            resetFlashcardFlip();
+        }
+
+        // Update progress
+        function updateFlashcardProgress() {
+            const counter = document.getElementById('flashcard-counter');
+            const progressBar = document.getElementById('flashcard-progress');
+            
+            counter.textContent = `${currentFlashcardIndex + 1} / ${flashcardData.length}`;
+            
+            const progress = ((currentFlashcardIndex + 1) / flashcardData.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // Update stats
+        function updateFlashcardStats(chapter, language) {
+            const chapterSelect = document.getElementById('flashcard-chapter-select');
+            const selectedOption = chapterSelect.options[chapterSelect.selectedIndex];
+            const chapterName = selectedOption ? selectedOption.textContent : `Chapter ${chapter}`;
+            
+            const languageNames = {
+                'en': 'English',
+                'ms': 'Malay',
+                'zh': 'Chinese',
+                'ta': 'Tamil'
+            };
+            
+            document.getElementById('current-chapter').textContent = chapterName;
+            document.getElementById('total-words').textContent = flashcardData.length;
+            document.getElementById('current-language').textContent = languageNames[language];
+        }
+
+        // Flip flashcard
+        function flipFlashcard() {
+            const flashcardInner = document.getElementById('flashcard-inner');
+            if (isFlashcardFlipped) {
+                flashcardInner.style.transform = 'rotateY(0deg)';
+            } else {
+                flashcardInner.style.transform = 'rotateY(180deg)';
+            }
+            isFlashcardFlipped = !isFlashcardFlipped;
+        }
+
+        // Reset flip
+        function resetFlashcardFlip() {
+            const flashcardInner = document.getElementById('flashcard-inner');
+            flashcardInner.style.transform = 'rotateY(0deg)';
+            isFlashcardFlipped = false;
+        }
+
+        // Navigation functions
+        function nextFlashcard() {
+            if (flashcardData.length === 0) return;
+            currentFlashcardIndex = (currentFlashcardIndex + 1) % flashcardData.length;
+            updateFlashcardDisplay();
+        }
+
+        function previousFlashcard() {
+            if (flashcardData.length === 0) return;
+            currentFlashcardIndex = currentFlashcardIndex === 0 
+                ? flashcardData.length - 1 
+                : currentFlashcardIndex - 1;
+            updateFlashcardDisplay();
+        }
+
+        function shuffleFlashcards() {
+            if (flashcardData.length === 0) return;
+            flashcardData = shuffleArray(flashcardData);
+            currentFlashcardIndex = 0;
+            updateFlashcardDisplay();
+        }
+
+        function resetFlashcards() {
+            currentFlashcardIndex = 0;
+            if (flashcardData.length > 0) {
+                updateFlashcardDisplay();
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            const activeTab = document.querySelector('.tab-content.active');
+            if (activeTab && activeTab.id === 'flashcard' && flashcardData.length > 0) {
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        previousFlashcard();
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        nextFlashcard();
+                        break;
+                    case ' ':
+                    case 'Enter':
+                        e.preventDefault();
+                        flipFlashcard();
+                        break;
+                    case 'r':
+                    case 'R':
+                        if (e.ctrlKey || e.metaKey) {
+                            e.preventDefault();
+                            shuffleFlashcards();
+                        }
+                        break;
+                }
+            }
+        });
 
         // Placeholder API function
         function loadApiInfo() {
